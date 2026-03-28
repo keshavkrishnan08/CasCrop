@@ -1,0 +1,427 @@
+# CasCrop — Git Repository Evidence for Patent Filing
+# Generated: $(date -Iseconds)
+# Repository: /Users/keshavkrishnan/Claude/Current/CasCrop/cascrop
+#
+# This file records the cryptographic commit hashes, timestamps, and
+# file inventories that establish the development timeline of the
+# inventions described in the provisional patent application.
+#
+# SHA-1 commit hashes are tamper-evident: any modification to the
+# repository history would change downstream hashes.
+
+Generated: 2026-03-28T19:03:22-04:00
+
+================================================================
+COMMIT HISTORY (oldest first)
+================================================================
+
+Commit:  e6b5aefacbfd9461e148db1c15ab0a3bec028641
+Date:    2026-03-28T16:04:35-04:00
+Author:  keshavkrishnan08 <kkrishnan@parktudor.org>
+Subject: feat: initial CasCrop project — complete research codebase
+---
+Implements the full CasCrop architecture for predicting agricultural crop
+waste as economic contagion via graph neural networks.
+
+Sub-Agent 1: Data acquisition (9 loaders: RMA, NASS, CDL, NOAA, Sentinel, VegScape, SMAP, prices, geographic)
+Sub-Agent 2: Data processing (matcher, labels, features, temporal splits)
+Sub-Agent 3: Graph construction (geo, commodity, transport, dynamic)
+Sub-Agent 4: Model architectures (CasCrop + 4 ablation baselines + RF/XGB/LSTM)
+Sub-Agent 5: Training infrastructure (focal loss, AdamW, CosineAnnealing, early stopping)
+Sub-Agent 6: Evaluation (metrics, DeLong, McNemar, bootstrap CI, subgroup analysis)
+Sub-Agent 7: Case study (cascade identification, attention extraction, maps)
+Sub-Agent 8: Economic impact estimation (preventable waste, national extrapolation)
+Sub-Agent 9: Formal economic model (LaTeX, propositions, hypotheses)
+Sub-Agent 10: Publication (Nature Food paper, bibliography, patent claims)
+
+65 Python files, 15,343 lines of code.
+9 pipeline scripts for end-to-end reproduction.
+6 unit test files covering ECMP, disentanglement, metrics.
+3 independent patent claims drafted.
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+
+
+Commit:  28cead114d93b1b129b59195edc8c10fe6d7d2ef
+Date:    2026-03-28T16:04:48-04:00
+Author:  keshavkrishnan08 <kkrishnan@parktudor.org>
+Subject: chore: add .gitignore, remove cached bytecode
+---
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+
+
+Commit:  aa1c1f5dbdda233d1781be6c4baa67bf7cd330a3
+Date:    2026-03-28T16:12:11-04:00
+Author:  keshavkrishnan08 <kkrishnan@parktudor.org>
+Subject: docs: upgrade patent application and prior art to publication quality
+---
+- Patent claims expanded to 26 total (3 independent + 23 dependent)
+- Provisional draft expanded to 462 lines with full detailed description,
+  figure references, and domain-independent ECMP claims
+- Prior art search expanded to 287 lines covering 18+ specific items
+  across 6 categories with novelty assessments and FTO analysis
+- Fixed duplicate section heading in economic_model.tex
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+
+
+Commit:  d056048e21b9ca1e1e1a86adad4cc87102425db1
+Date:    2026-03-28T16:37:33-04:00
+Author:  keshavkrishnan08 <kkrishnan@parktudor.org>
+Subject: feat: add patent change log, data downloads, integration test
+---
+- Patent CHANGE_LOG.md with timestamped invention timeline,
+  inventive insights, git commit evidence, and counsel notes
+- Downloaded 606 MB of raw data (RMA claims, FRED prices,
+  Census geography, NOAA climate data)
+- scripts/00_setup_and_download.py: robust download orchestrator
+  with retry logic, manifest generation, .env key management
+- scripts/run_integration_test.py: 14-point validation proving
+  all components work (data parsing, all 5 models, ECMP asymmetry,
+  training loop, evaluation metrics, statistical tests)
+- Fixed log_loss eps compatibility with sklearn >=1.3
+- All background agent code fixes incorporated
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+
+
+Commit:  81179516535f676376cd03ab1024b9313adae8d9
+Date:    2026-03-28T16:38:29-04:00
+Author:  keshavkrishnan08 <kkrishnan@parktudor.org>
+Subject: fix: use correct RMA URL, add HTML error page detection
+---
+- Primary RMA URL: pubfs-rma.fpac.usda.gov/pub/Web_Data_Files/...
+- Download script now detects HTML error pages and discards them
+- Prevents saving 404/redirect pages as data files
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+
+
+================================================================
+FILE INVENTORY (85 tracked files)
+================================================================
+.env.example
+.gitignore
+Dockerfile
+README.md
+configs/ablation_row1.yaml
+configs/ablation_row2.yaml
+configs/ablation_row3.yaml
+configs/ablation_row4.yaml
+configs/ablation_row5.yaml
+configs/default.yaml
+paper/main.tex
+paper/references.bib
+paper/sections/economic_model.tex
+patent/CHANGE_LOG.md
+patent/claims.md
+patent/prior_art_search.md
+patent/provisional_draft.md
+requirements.txt
+scripts/00_setup_and_download.py
+scripts/01_download_data.py
+scripts/02_process_data.py
+scripts/03_build_graphs.py
+scripts/04_train_all.py
+scripts/05_evaluate_all.py
+scripts/06_case_study.py
+scripts/07_generate_figures.py
+scripts/08_generate_tables.py
+scripts/09_full_pipeline.py
+scripts/run_integration_test.py
+setup.py
+src/__init__.py
+src/data/__init__.py
+src/data/crop_loader.py
+src/data/dataset.py
+src/data/graph_builder.py
+src/data/matcher.py
+src/data/price_loader.py
+src/data/rma_loader.py
+src/data/sentinel_loader.py
+src/data/soil_loader.py
+src/data/utils.py
+src/data/vegscape_loader.py
+src/data/weather_loader.py
+src/evaluation/__init__.py
+src/evaluation/ablation_runner.py
+src/evaluation/attention_analysis.py
+src/evaluation/case_study.py
+src/evaluation/economic_impact.py
+src/evaluation/metrics.py
+src/evaluation/statistical_tests.py
+src/models/__init__.py
+src/models/baselines/__init__.py
+src/models/baselines/geo_gat.py
+src/models/baselines/local_econ.py
+src/models/baselines/local_only.py
+src/models/baselines/symmetric_ecmp.py
+src/models/cascrop.py
+src/models/encoders/__init__.py
+src/models/encoders/biophysical_encoder.py
+src/models/encoders/disentanglement.py
+src/models/encoders/economic_encoder.py
+src/models/graph/__init__.py
+src/models/graph/ecmp.py
+src/models/graph/graph_attention.py
+src/models/graph/graph_construction.py
+src/models/heads/__init__.py
+src/models/heads/cause_classifier.py
+src/models/heads/waste_classifier.py
+src/training/__init__.py
+src/training/early_stopping.py
+src/training/losses.py
+src/training/optimizers.py
+src/training/schedulers.py
+src/training/trainer.py
+src/visualization/__init__.py
+src/visualization/attention_heatmaps.py
+src/visualization/figures.py
+src/visualization/maps.py
+src/visualization/tables.py
+tests/test_data_loaders.py
+tests/test_disentanglement.py
+tests/test_ecmp.py
+tests/test_graph_construction.py
+tests/test_metrics.py
+tests/test_models.py
+
+================================================================
+PER-COMMIT FILE CHANGES
+================================================================
+
+--- Commit e6b5aefacbfd9461e148db1c15ab0a3bec028641 (2026-03-28T16:04:35-04:00) ---
+feat: initial CasCrop project — complete research codebase
+
+
+ Dockerfile                                         |  26 +
+ README.md                                          |  97 +++
+ configs/ablation_row1.yaml                         |   9 +
+ configs/ablation_row2.yaml                         |   8 +
+ configs/ablation_row3.yaml                         |  11 +
+ configs/ablation_row4.yaml                         |  12 +
+ configs/ablation_row5.yaml                         |  12 +
+ configs/default.yaml                               |  69 ++
+ paper/main.tex                                     | 593 ++++++++++++++
+ paper/references.bib                               | 387 ++++++++++
+ paper/sections/economic_model.tex                  | 132 ++++
+ patent/claims.md                                   |  98 +++
+ patent/prior_art_search.md                         |  89 +++
+ patent/provisional_draft.md                        | 113 +++
+ requirements.txt                                   |  22 +
+ scripts/01_download_data.py                        | 253 ++++++
+ scripts/02_process_data.py                         | 113 +++
+ scripts/03_build_graphs.py                         | 131 ++++
+ scripts/04_train_all.py                            | 193 +++++
+ scripts/05_evaluate_all.py                         | 241 ++++++
+ scripts/06_case_study.py                           | 143 ++++
+ scripts/07_generate_figures.py                     | 138 ++++
+ scripts/08_generate_tables.py                      | 160 ++++
+ scripts/09_full_pipeline.py                        | 115 +++
+ setup.py                                           |  28 +
+ src/__init__.py                                    |   0
+ src/__pycache__/__init__.cpython-311.pyc           | Bin 0 -> 177 bytes
+ src/data/__init__.py                               |  66 ++
+ src/data/__pycache__/__init__.cpython-311.pyc      | Bin 0 -> 2345 bytes
+ src/data/__pycache__/crop_loader.cpython-311.pyc   | Bin 0 -> 21676 bytes
+ src/data/__pycache__/dataset.cpython-311.pyc       | Bin 0 -> 28886 bytes
+ src/data/__pycache__/graph_builder.cpython-311.pyc | Bin 0 -> 36692 bytes
+ src/data/__pycache__/matcher.cpython-311.pyc       | Bin 0 -> 40089 bytes
+ src/data/__pycache__/price_loader.cpython-311.pyc  | Bin 0 -> 34948 bytes
+ src/data/__pycache__/rma_loader.cpython-311.pyc    | Bin 0 -> 18881 bytes
+ .../__pycache__/sentinel_loader.cpython-311.pyc    | Bin 0 -> 27618 bytes
+ src/data/__pycache__/soil_loader.cpython-311.pyc   | Bin 0 -> 29877 bytes
+ src/data/__pycache__/utils.cpython-311.pyc         | Bin 0 -> 22654 bytes
+ .../__pycache__/vegscape_loader.cpython-311.pyc    | Bin 0 -> 20839 bytes
+ .../__pycache__/weather_loader.cpython-311.pyc     | Bin 0 -> 29982 bytes
+ src/data/crop_loader.py                            | 493 ++++++++++++
+ src/data/dataset.py                                | 596 ++++++++++++++
+ src/data/graph_builder.py                          | 759 ++++++++++++++++++
+ src/data/matcher.py                                | 860 +++++++++++++++++++++
+ src/data/price_loader.py                           | 821 ++++++++++++++++++++
+ src/data/rma_loader.py                             | 435 +++++++++++
+ src/data/sentinel_loader.py                        | 593 ++++++++++++++
+ src/data/soil_loader.py                            | 710 +++++++++++++++++
+ src/data/utils.py                                  | 459 +++++++++++
+ src/data/vegscape_loader.py                        | 462 +++++++++++
+ src/data/weather_loader.py                         | 697 +++++++++++++++++
+ src/evaluation/__init__.py                         |  20 +
+ src/evaluation/ablation_runner.py                  | 232 ++++++
+ src/evaluation/attention_analysis.py               | 273 +++++++
+ src/evaluation/case_study.py                       | 345 +++++++++
+ src/evaluation/economic_impact.py                  | 259 +++++++
+ src/evaluation/metrics.py                          | 191 +++++
+ src/evaluation/statistical_tests.py                | 338 ++++++++
+ src/models/__init__.py                             |  63 ++
+ src/models/__pycache__/__init__.cpython-311.pyc    | Bin 0 -> 1575 bytes
+ src/models/__pycache__/cascrop.cpython-311.pyc     | Bin 0 -> 9217 bytes
+ src/models/baselines/__init__.py                   |  13 +
+ .../baselines/__pycache__/__init__.cpython-311.pyc | Bin 0 -> 632 bytes
+ .../baselines/__pycache__/geo_gat.cpython-311.pyc  | Bin 0 -> 6565 bytes
+ .../__pycache__/local_econ.cpython-311.pyc         | Bin 0 -> 6298 bytes
+ .../__pycache__/local_only.cpython-311.pyc         | Bin 0 -> 5185 bytes
+ .../__pycache__/symmetric_ecmp.cpython-311.pyc     | Bin 0 -> 7406 bytes
+ src/models/baselines/geo_gat.py                    | 144 ++++
+ src/models/baselines/local_econ.py                 | 137 ++++
+ src/models/baselines/local_only.py                 | 105 +++
+ src/models/baselines/symmetric_ecmp.py             | 167 ++++
+ src/models/cascrop.py                              | 233 ++++++
+ src/models/encoders/__init__.py                    |  15 +
+ .../encoders/__pycache__/__init__.cpython-311.pyc  | Bin 0 -> 623 bytes
+ .../biophysical_encoder.cpython-311.pyc            | Bin 0 -> 3472 bytes
+ .../__pycache__/disentanglement.cpython-311.pyc    | Bin 0 -> 7467 bytes
+ .../__pycache__/economic_encoder.cpython-311.pyc   | Bin 0 -> 3421 bytes
+ src/models/encoders/biophysical_encoder.py         |  68 ++
+ src/models/encoders/disentanglement.py             | 136 ++++
+ src/models/encoders/economic_encoder.py            |  67 ++
+ src/models/graph/__init__.py                       |  13 +
+ .../graph/__pycache__/__init__.cpython-311.pyc     | Bin 0 -> 592 bytes
+ src/models/graph/__pycache__/ecmp.cpython-311.pyc  | Bin 0 -> 13420 bytes
+ .../__pycache__/graph_attention.cpython-311.pyc    | Bin 0 -> 9533 bytes
+ .../__pycache__/graph_construction.cpython-311.pyc | Bin 0 -> 4653 bytes
+ src/models/graph/ecmp.py                           | 321 ++++++++
+ src/models/graph/graph_attention.py                | 196 +++++
+ src/models/graph/graph_construction.py             |  98 +++
+ src/models/heads/__init__.py                       |  10 +
+ .../heads/__pycache__/__init__.cpython-311.pyc     | Bin 0 -> 485 bytes
+ .../__pycache__/cause_classifier.cpython-311.pyc   | Bin 0 -> 4075 bytes
+ .../__pycache__/waste_classifier.cpython-311.pyc   | Bin 0 -> 3096 bytes
+ src/models/heads/cause_classifier.py               |  73 ++
+ src/models/heads/waste_classifier.py               |  50 ++
+ src/training/__init__.py                           |  16 +
+ src/training/__pycache__/__init__.cpython-311.pyc  | Bin 0 -> 798 bytes
+ .../__pycache__/early_stopping.cpython-311.pyc     | Bin 0 -> 7466 bytes
+ src/training/__pycache__/losses.cpython-311.pyc    | Bin 0 -> 8566 bytes
+ .../__pycache__/optimizers.cpython-311.pyc         | Bin 0 -> 6853 bytes
+ .../__pycache__/schedulers.cpython-311.pyc         | Bin 0 -> 4116 bytes
+ src/training/__pycache__/trainer.cpython-311.pyc   | Bin 0 -> 38066 bytes
+ src/training/early_stopping.py                     | 175 +++++
+ src/training/losses.py                             | 211 +++++
+ src/training/optimizers.py                         | 144 ++++
+ src/training/schedulers.py                         | 102 +++
+ src/training/trainer.py                            | 820 ++++++++++++++++++++
+ src/visualization/__init__.py                      |  23 +
+ src/visualization/attention_heatmaps.py            | 197 +++++
+ src/visualization/figures.py                       | 320 ++++++++
+ src/visualization/maps.py                          | 214 +++++
+ src/visualization/tables.py                        | 325 ++++++++
+ tests/test_data_loaders.py                         | 157 ++++
+ tests/test_disentanglement.py                      |  66 ++
+ tests/test_ecmp.py                                 | 142 ++++
+ tests/test_graph_construction.py                   |  51 ++
+ tests/test_metrics.py                              | 135 ++++
+ tests/test_models.py                               | 212 +++++
+ 117 files changed, 17021 insertions(+)
+
+--- Commit 28cead114d93b1b129b59195edc8c10fe6d7d2ef (2026-03-28T16:04:48-04:00) ---
+chore: add .gitignore, remove cached bytecode
+
+
+ .gitignore                                         |  36 +++++++++++++++++++++
+ src/__pycache__/__init__.cpython-311.pyc           | Bin 177 -> 0 bytes
+ src/data/__pycache__/__init__.cpython-311.pyc      | Bin 2345 -> 0 bytes
+ src/data/__pycache__/crop_loader.cpython-311.pyc   | Bin 21676 -> 0 bytes
+ src/data/__pycache__/dataset.cpython-311.pyc       | Bin 28886 -> 0 bytes
+ src/data/__pycache__/graph_builder.cpython-311.pyc | Bin 36692 -> 0 bytes
+ src/data/__pycache__/matcher.cpython-311.pyc       | Bin 40089 -> 0 bytes
+ src/data/__pycache__/price_loader.cpython-311.pyc  | Bin 34948 -> 0 bytes
+ src/data/__pycache__/rma_loader.cpython-311.pyc    | Bin 18881 -> 0 bytes
+ .../__pycache__/sentinel_loader.cpython-311.pyc    | Bin 27618 -> 0 bytes
+ src/data/__pycache__/soil_loader.cpython-311.pyc   | Bin 29877 -> 0 bytes
+ src/data/__pycache__/utils.cpython-311.pyc         | Bin 22654 -> 0 bytes
+ .../__pycache__/vegscape_loader.cpython-311.pyc    | Bin 20839 -> 0 bytes
+ .../__pycache__/weather_loader.cpython-311.pyc     | Bin 29982 -> 0 bytes
+ src/models/__pycache__/__init__.cpython-311.pyc    | Bin 1575 -> 0 bytes
+ src/models/__pycache__/cascrop.cpython-311.pyc     | Bin 9217 -> 0 bytes
+ .../baselines/__pycache__/__init__.cpython-311.pyc | Bin 632 -> 0 bytes
+ .../baselines/__pycache__/geo_gat.cpython-311.pyc  | Bin 6565 -> 0 bytes
+ .../__pycache__/local_econ.cpython-311.pyc         | Bin 6298 -> 0 bytes
+ .../__pycache__/local_only.cpython-311.pyc         | Bin 5185 -> 0 bytes
+ .../__pycache__/symmetric_ecmp.cpython-311.pyc     | Bin 7406 -> 0 bytes
+ .../encoders/__pycache__/__init__.cpython-311.pyc  | Bin 623 -> 0 bytes
+ .../biophysical_encoder.cpython-311.pyc            | Bin 3472 -> 0 bytes
+ .../__pycache__/disentanglement.cpython-311.pyc    | Bin 7467 -> 0 bytes
+ .../__pycache__/economic_encoder.cpython-311.pyc   | Bin 3421 -> 0 bytes
+ .../graph/__pycache__/__init__.cpython-311.pyc     | Bin 592 -> 0 bytes
+ src/models/graph/__pycache__/ecmp.cpython-311.pyc  | Bin 13420 -> 0 bytes
+ .../__pycache__/graph_attention.cpython-311.pyc    | Bin 9533 -> 0 bytes
+ .../__pycache__/graph_construction.cpython-311.pyc | Bin 4653 -> 0 bytes
+ .../heads/__pycache__/__init__.cpython-311.pyc     | Bin 485 -> 0 bytes
+ .../__pycache__/cause_classifier.cpython-311.pyc   | Bin 4075 -> 0 bytes
+ .../__pycache__/waste_classifier.cpython-311.pyc   | Bin 3096 -> 0 bytes
+ src/training/__pycache__/__init__.cpython-311.pyc  | Bin 798 -> 0 bytes
+ .../__pycache__/early_stopping.cpython-311.pyc     | Bin 7466 -> 0 bytes
+ src/training/__pycache__/losses.cpython-311.pyc    | Bin 8566 -> 0 bytes
+ .../__pycache__/optimizers.cpython-311.pyc         | Bin 6853 -> 0 bytes
+ .../__pycache__/schedulers.cpython-311.pyc         | Bin 4116 -> 0 bytes
+ src/training/__pycache__/trainer.cpython-311.pyc   | Bin 38066 -> 0 bytes
+ 38 files changed, 36 insertions(+)
+
+--- Commit aa1c1f5dbdda233d1781be6c4baa67bf7cd330a3 (2026-03-28T16:12:11-04:00) ---
+docs: upgrade patent application and prior art to publication quality
+
+
+ paper/sections/economic_model.tex |   8 +-
+ patent/claims.md                  | 150 ++++++++-----
+ patent/prior_art_search.md        | 304 ++++++++++++++++++++-----
+ patent/provisional_draft.md       | 451 +++++++++++++++++++++++++++++++++-----
+ 4 files changed, 754 insertions(+), 159 deletions(-)
+
+--- Commit d056048e21b9ca1e1e1a86adad4cc87102425db1 (2026-03-28T16:37:33-04:00) ---
+feat: add patent change log, data downloads, integration test
+
+
+ .env.example                         |  35 +++
+ patent/CHANGE_LOG.md                 | 192 ++++++++++++++++
+ scripts/00_setup_and_download.py     | 422 +++++++++++++++++++++++++++++++++++
+ scripts/05_evaluate_all.py           |   4 +-
+ scripts/run_integration_test.py      | 280 +++++++++++++++++++++++
+ src/data/__init__.py                 |  22 +-
+ src/data/crop_loader.py              |   2 +-
+ src/data/dataset.py                  |  26 +--
+ src/data/price_loader.py             |   2 +-
+ src/data/rma_loader.py               |   2 +-
+ src/data/sentinel_loader.py          |   2 +-
+ src/data/soil_loader.py              |   2 +-
+ src/data/vegscape_loader.py          |   2 +-
+ src/data/weather_loader.py           |   4 +-
+ src/evaluation/ablation_runner.py    |  20 +-
+ src/evaluation/attention_analysis.py |   4 +-
+ src/evaluation/metrics.py            |   2 +-
+ src/training/__init__.py             |  10 +-
+ src/training/trainer.py              |   8 +-
+ tests/test_data_loaders.py           |  88 +++-----
+ tests/test_disentanglement.py        |  19 +-
+ tests/test_ecmp.py                   |  26 ++-
+ tests/test_graph_construction.py     |  21 +-
+ tests/test_models.py                 |  95 +++++---
+ 24 files changed, 1122 insertions(+), 168 deletions(-)
+
+--- Commit 81179516535f676376cd03ab1024b9313adae8d9 (2026-03-28T16:38:29-04:00) ---
+fix: use correct RMA URL, add HTML error page detection
+
+
+ scripts/00_setup_and_download.py | 11 +++++++++--
+ tests/test_disentanglement.py    |  5 ++++-
+ tests/test_ecmp.py               | 26 ++++++++++++++++++--------
+ tests/test_metrics.py            |  9 +++++++--
+ 4 files changed, 38 insertions(+), 13 deletions(-)
+
+================================================================
+SHA-256 CHECKSUMS OF KEY INVENTIVE FILES
+================================================================
+9d3feaaf309f181842952b8bc8222c0ff4459c313cbe42875ad836cae38eda57  src/models/graph/ecmp.py
+57fe4317d9293b737328d1f2a9cd62863bc17cfdad8e7f114522cb96558b029e  src/models/cascrop.py
+fbfd02481898e41bbca49cb31ed7753ed58c1c82521e0a7120d713486ed6cbc1  src/models/encoders/disentanglement.py
+795f584d4d48f2d20d45ec186be9dcc038b7635b2902590bf338d91647342351  patent/claims.md
+92b95c6e2b5ba9bf5b5e6e072019b519b0f5044426f6f782c3a1432b9f1b0638  patent/provisional_draft.md
+046fc4c9b89277d67ceafdbe83ec023d7729901c04bd60df9094c8949001033f  patent/CHANGE_LOG.md
+
+================================================================
+REPOSITORY INTEGRITY VERIFICATION
+================================================================
+To verify: clone this repository and run 'git log --oneline'
+The following HEAD hash must match:
+81179516535f676376cd03ab1024b9313adae8d9
+
+fsck output:
