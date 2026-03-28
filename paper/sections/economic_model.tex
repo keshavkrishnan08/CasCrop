@@ -1,8 +1,6 @@
 % economic_model.tex — Section 2: Economic Model of Crop Waste Contagion
-% Self-contained section for inclusion in main paper
-
-\section{Economic Model of Crop Waste Contagion}
-\label{sec:economic_model}
+% Included via \input{sections/economic_model} in main.tex
+% The \section and \label are in main.tex, not here.
 
 Why does a bumper harvest in one county cause crop waste hundreds of miles away?
 Standard agronomic models treat waste as a local phenomenon---drought, pest damage, frost---and ignore the market channel entirely.
@@ -76,7 +74,7 @@ Hence $\Pr(\pi_i' \leq 0) > \Pr(\pi_i \leq 0)$, and the waste probability in reg
 Proposition~\ref{prop:contagion} captures the central paradox of crop waste: good weather in one county can destroy value in another.
 The mechanism is purely economic---no pathogen spreads, no pest migrates.
 A bumper harvest floods shared markets, crashes the local price, and pushes marginal farmers below their break-even threshold.
-The strength of this contagion is governed entirely by $\beta_{ij}$, the market connectivity.
+The strength of this contagion is governed entirely by $\beta_{ij}$, the market connectivity~\citep{acemoglu2015systemic}.
 
 \begin{corollary}[Asymmetric Propagation]
 \label{cor:asymmetry}
