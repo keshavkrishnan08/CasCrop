@@ -66,14 +66,14 @@ def evaluate_model(model, test_loader, device):
             outputs = model(batch_device)
 
             waste_prob = torch.sigmoid(outputs["waste_logits"]).cpu().numpy()
-            all_y_true.append(batch["y_waste"].cpu().numpy())
+            all_y_true.append(batch["waste_target"].cpu().numpy())
             all_y_prob.append(waste_prob)
 
             if "cause_logits" in outputs:
                 all_cause_pred.append(
                     outputs["cause_logits"].argmax(dim=-1).cpu().numpy()
                 )
-                all_cause_true.append(batch["y_cause"].cpu().numpy())
+                all_cause_true.append(batch["cause_target"].cpu().numpy())
 
             if "z_bio" in outputs:
                 all_z_bio.append(outputs["z_bio"].cpu().numpy())

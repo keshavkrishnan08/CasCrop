@@ -4,6 +4,11 @@ Tests the core novelty: asymmetric shock conditioning, multi-head attention,
 and correct attention weight extraction.
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
 import pytest
 import torch
 import numpy as np
@@ -13,7 +18,7 @@ class TestECMPAsymmetry:
     """Verify that positive and negative shocks produce different attention patterns."""
 
     def test_asymmetric_produces_different_outputs(self):
-        from src.models.graph.ecmp import ECMPLayer
+        from models.graph.ecmp import ECMPLayer
 
         layer = ECMPLayer(in_dim=64, out_dim=32, num_heads=4, asymmetric=True)
         layer.eval()
@@ -39,7 +44,7 @@ class TestECMPAsymmetry:
             "Asymmetric ECMP should produce different attention for pos vs neg shocks"
 
     def test_symmetric_produces_same_magnitude_attention(self):
-        from src.models.graph.ecmp import ECMPLayer
+        from models.graph.ecmp import ECMPLayer
 
         layer = ECMPLayer(in_dim=64, out_dim=32, num_heads=4, asymmetric=False)
         layer.eval()
@@ -67,7 +72,7 @@ class TestECMPAttentionExtraction:
     """Verify attention weights are properly extractable for case study."""
 
     def test_attention_weights_returned(self):
-        from src.models.graph.ecmp import ECMPLayer
+        from models.graph.ecmp import ECMPLayer
 
         layer = ECMPLayer(in_dim=64, out_dim=32, num_heads=4)
         x = torch.randn(10, 64)
@@ -80,7 +85,7 @@ class TestECMPAttentionExtraction:
         assert attn.shape[1] == 4   # num_heads
 
     def test_attention_weights_sum_to_one(self):
-        from src.models.graph.ecmp import ECMPLayer
+        from models.graph.ecmp import ECMPLayer
 
         layer = ECMPLayer(in_dim=64, out_dim=32, num_heads=1, dropout=0.0)
         layer.eval()
@@ -116,7 +121,7 @@ class TestECMPStack:
     """Test the stacked ECMP with residual connections."""
 
     def test_residual_connection(self):
-        from src.models.graph.ecmp import ECMPStack
+        from models.graph.ecmp import ECMPStack
 
         stack = ECMPStack(in_dim=64, hidden_dim=32, out_dim=64, num_heads=4)
         x = torch.randn(10, 64)
@@ -129,8 +134,8 @@ class TestECMPStack:
         # Output should have same shape as input (residual)
         assert x_out.shape == (10, 64)
 
-    def test_multiple_layers_refine(self):
-        from src.models.graph.ecmp import ECMPStack
+    def test_stack_returns_attention(self):
+        from models.graph.ecmp import ECMPStack
 
         stack = ECMPStack(in_dim=64, hidden_dim=32, out_dim=64, num_heads=4)
         x = torch.randn(10, 64)
@@ -138,5 +143,8 @@ class TestECMPStack:
         edge_attr = torch.randn(30, 3)
         price_shocks = torch.randn(10, 1)
 
-        x_out, attn_list = stack(x, edge_index, edge_attr, price_shocks)
-        assert len(attn_list) == 2  # 2 ECMP layers
+        x_out, attn = stack(x, edge_index, edge_attr, price_shocks)
+        # ECMPStack returns attention from the second layer
+        assert isinstance(attn, torch.Tensor)
+        assert attn.shape[0] == 30   # num_edges
+        assert attn.shape[1] == 4    # num_heads

@@ -17,17 +17,17 @@ logger = logging.getLogger(__name__)
 
 # Model registry mapping ablation row names to their module paths
 MODEL_REGISTRY = {
-    "row1_local_only": "src.models.baselines.local_only.LocalOnlyModel",
-    "row2_local_econ": "src.models.baselines.local_econ.LocalEconModel",
-    "row3_geo_gat": "src.models.baselines.geo_gat.GeoGATModel",
-    "row4_symmetric_ecmp": "src.models.baselines.symmetric_ecmp.SymmetricECMPModel",
-    "row5_cascrop": "src.models.cascrop.CasCrop",
+    "row1_local_only": "models.baselines.local_only.LocalOnlyModel",
+    "row2_local_econ": "models.baselines.local_econ.LocalEconModel",
+    "row3_geo_gat": "models.baselines.geo_gat.GeoGATModel",
+    "row4_symmetric_ecmp": "models.baselines.symmetric_ecmp.SymmetricECMPModel",
+    "row5_cascrop": "models.cascrop.CasCrop",
 }
 
 ADDITIONAL_BASELINES = {
     "random_forest": "sklearn_baseline",
     "xgboost": "sklearn_baseline",
-    "lstm": "src.models.baselines.lstm_baseline.LSTMBaseline",
+    "lstm": "models.baselines.lstm_baseline.LSTMBaseline",
 }
 
 ABLATION_DISPLAY_NAMES = {
@@ -80,8 +80,8 @@ class AblationRunner:
         Returns dict with all metrics and predictions.
         """
         import torch
-        from src.training.trainer import CasCropTrainer
-        from src.evaluation.metrics import compute_all_metrics
+        from training.trainer import CasCropTrainer
+        from evaluation.metrics import compute_all_metrics
 
         # Set seed
         torch.manual_seed(seed)
@@ -116,13 +116,13 @@ class AblationRunner:
                 }
                 outputs = model(batch)
                 waste_prob = torch.sigmoid(outputs["waste_logits"]).cpu().numpy()
-                all_y_true.append(batch["y_waste"].cpu().numpy())
+                all_y_true.append(batch["waste_target"].cpu().numpy())
                 all_y_prob.append(waste_prob)
 
                 if "cause_logits" in outputs:
                     cause_pred = outputs["cause_logits"].argmax(dim=-1).cpu().numpy()
                     all_cause_pred.append(cause_pred)
-                    all_cause_true.append(batch["y_cause"].cpu().numpy())
+                    all_cause_true.append(batch["cause_target"].cpu().numpy())
 
         y_true = np.concatenate(all_y_true).flatten()
         y_prob = np.concatenate(all_y_prob).flatten()

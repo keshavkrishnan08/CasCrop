@@ -26,7 +26,7 @@ from typing import List, Optional, Union
 
 import pandas as pd
 
-from cascrop.src.data.utils import (
+from .utils import (
     CAUSE_OF_LOSS_MAPPING,
     COMMODITY_CODES,
     STATE_FIPS_TO_NAME,

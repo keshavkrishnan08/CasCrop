@@ -12,7 +12,7 @@ Data acquisition loaders:
 """
 
 # --- Data acquisition loaders ---
-from cascrop.src.data.utils import (
+from .utils import (
     CAUSE_OF_LOSS_MAPPING,
     COMMODITY_CODES,
     TARGET_COMMODITIES,
@@ -24,18 +24,18 @@ from cascrop.src.data.utils import (
     validate_fips,
     map_cause_code,
 )
-from cascrop.src.data.rma_loader import RMALoader
-from cascrop.src.data.crop_loader import NASSLoader
-from cascrop.src.data.weather_loader import NOAAWeatherLoader
-from cascrop.src.data.sentinel_loader import SentinelLoader
-from cascrop.src.data.vegscape_loader import VegScapeLoader
-from cascrop.src.data.soil_loader import SMAPLoader
-from cascrop.src.data.price_loader import PriceLoader
+from .rma_loader import RMALoader
+from .crop_loader import NASSLoader
+from .weather_loader import NOAAWeatherLoader
+from .sentinel_loader import SentinelLoader
+from .vegscape_loader import VegScapeLoader
+from .soil_loader import SMAPLoader
+from .price_loader import PriceLoader
 
 # --- Data processing / matching / dataset ---
-from cascrop.src.data.dataset import CasCropDataset, CasCropGraphBatch, get_dataloaders
-from cascrop.src.data.graph_builder import GraphBuilder
-from cascrop.src.data.matcher import DataMatcher
+from .dataset import CasCropDataset, CasCropGraphBatch, get_dataloaders
+from .graph_builder import GraphBuilder
+from .matcher import DataMatcher
 
 __all__ = [
     # Loaders

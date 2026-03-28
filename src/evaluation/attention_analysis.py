@@ -55,8 +55,8 @@ class AttentionAnalyzer:
             else:
                 result["attention_weights"] = attn.cpu().numpy()
 
-        if "price_shock" in batch:
-            result["price_shocks"] = batch["price_shock"].cpu().numpy()
+        if "price_shocks" in batch:
+            result["price_shocks"] = batch["price_shocks"].cpu().numpy()
 
         if "fips" in batch:
             result["node_fips"] = batch["fips"]

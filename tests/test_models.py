@@ -4,6 +4,12 @@ Tests forward pass, output shapes, gradient flow, and compatibility
 for CasCrop and all baseline models.
 """
 
+import sys
+from pathlib import Path
+
+# Ensure src/ is on the import path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
 import pytest
 import torch
 import numpy as np
@@ -38,17 +44,17 @@ def make_dummy_batch(batch_size=16, num_nodes=32, num_edges=128):
         "x_bio": torch.randn(num_nodes, 30),
         "x_econ": torch.randn(num_nodes, 15),
         "x_hist": torch.randn(num_nodes, 10),
-        "y_waste": torch.randint(0, 2, (num_nodes, 1)).float(),
-        "y_cause": torch.randint(0, 6, (num_nodes,)),
+        "waste_target": torch.randint(0, 2, (num_nodes, 1)).float(),
+        "cause_target": torch.randint(0, 6, (num_nodes,)),
         "edge_index": torch.randint(0, num_nodes, (2, num_edges)),
         "edge_attr": torch.randn(num_edges, 3),
-        "price_shock": torch.randn(num_nodes, 1),
+        "price_shocks": torch.randn(num_nodes, 1),
     }
 
 
 class TestBiophysicalEncoder:
     def test_forward_shape(self):
-        from src.models.encoders.biophysical_encoder import BiophysicalEncoder
+        from models.encoders.biophysical_encoder import BiophysicalEncoder
 
         encoder = BiophysicalEncoder(input_dim=30, latent_dim=64, hidden_dim=128)
         x = torch.randn(16, 30)
@@ -56,7 +62,7 @@ class TestBiophysicalEncoder:
         assert z.shape == (16, 64)
 
     def test_gradient_flow(self):
-        from src.models.encoders.biophysical_encoder import BiophysicalEncoder
+        from models.encoders.biophysical_encoder import BiophysicalEncoder
 
         encoder = BiophysicalEncoder(input_dim=30, latent_dim=64)
         x = torch.randn(16, 30)
@@ -69,7 +75,7 @@ class TestBiophysicalEncoder:
 
 class TestEconomicEncoder:
     def test_forward_shape(self):
-        from src.models.encoders.economic_encoder import EconomicEncoder
+        from models.encoders.economic_encoder import EconomicEncoder
 
         encoder = EconomicEncoder(input_dim=15, latent_dim=64, hidden_dim=64)
         x = torch.randn(16, 15)
@@ -79,7 +85,7 @@ class TestEconomicEncoder:
 
 class TestDisentanglement:
     def test_forward(self):
-        from src.models.encoders.disentanglement import DisentanglementModule
+        from models.encoders.disentanglement import DisentanglementModule
 
         module = DisentanglementModule(latent_dim=64, hidden_dim=128)
         z_bio = torch.randn(16, 64)
@@ -91,7 +97,7 @@ class TestDisentanglement:
 
 class TestECMP:
     def test_ecmp_layer_forward(self):
-        from src.models.graph.ecmp import ECMPLayer
+        from models.graph.ecmp import ECMPLayer
 
         layer = ECMPLayer(
             in_dim=64, out_dim=32, num_heads=4,
@@ -107,7 +113,7 @@ class TestECMP:
         assert attn_weights.shape[0] == 128
 
     def test_ecmp_asymmetric_vs_symmetric(self):
-        from src.models.graph.ecmp import ECMPLayer
+        from models.graph.ecmp import ECMPLayer
 
         asym = ECMPLayer(in_dim=64, out_dim=32, num_heads=4, asymmetric=True)
         sym = ECMPLayer(in_dim=64, out_dim=32, num_heads=4, asymmetric=False)
@@ -118,7 +124,7 @@ class TestECMP:
         assert asym_params > sym_params
 
     def test_ecmp_stack_forward(self):
-        from src.models.graph.ecmp import ECMPStack
+        from models.graph.ecmp import ECMPStack
 
         stack = ECMPStack(in_dim=64, hidden_dim=32, out_dim=64, num_heads=4)
         x = torch.randn(32, 64)
@@ -126,12 +132,11 @@ class TestECMP:
         edge_attr = torch.randn(128, 3)
         price_shocks = torch.randn(32, 1)
 
-        x_out, attn_list = stack(x, edge_index, edge_attr, price_shocks)
+        x_out, attn = stack(x, edge_index, edge_attr, price_shocks)
         assert x_out.shape == (32, 64)
-        assert isinstance(attn_list, list)
 
     def test_ecmp_gradient_flow(self):
-        from src.models.graph.ecmp import ECMPLayer
+        from models.graph.ecmp import ECMPLayer
 
         layer = ECMPLayer(in_dim=64, out_dim=32, num_heads=4, asymmetric=True)
         x = torch.randn(32, 64, requires_grad=True)
@@ -148,13 +153,17 @@ class TestECMP:
 
 class TestCasCrop:
     def test_full_forward(self):
-        from src.models.cascrop import CasCrop
+        from models.cascrop import CasCrop
 
-        config = make_dummy_config()
-        model = CasCrop(config)
+        model = CasCrop(
+            bio_input_dim=30, econ_input_dim=15, hist_dim=10,
+            latent_dim=64, dropout=0.1,
+        )
         batch = make_dummy_batch()
 
-        outputs = model(batch)
+        model.eval()
+        with torch.no_grad():
+            outputs = model(batch)
         assert "waste_logits" in outputs
         assert "cause_logits" in outputs
         assert "z_bio" in outputs
@@ -162,10 +171,12 @@ class TestCasCrop:
         assert "attention_weights" in outputs
 
     def test_predict(self):
-        from src.models.cascrop import CasCrop
+        from models.cascrop import CasCrop
 
-        config = make_dummy_config()
-        model = CasCrop(config)
+        model = CasCrop(
+            bio_input_dim=30, econ_input_dim=15, hist_dim=10,
+            latent_dim=64, dropout=0.1,
+        )
         batch = make_dummy_batch()
 
         probs = model.predict_proba(batch)
@@ -175,38 +186,50 @@ class TestCasCrop:
 
 class TestBaselines:
     def test_local_only(self):
-        from src.models.baselines.local_only import LocalOnlyModel
+        from models.baselines.local_only import LocalOnlyModel
 
-        config = make_dummy_config()
-        model = LocalOnlyModel(config)
+        model = LocalOnlyModel(bio_input_dim=30, latent_dim=64, dropout=0.1)
         batch = make_dummy_batch()
-        outputs = model(batch)
+        model.eval()
+        with torch.no_grad():
+            outputs = model(batch)
         assert "waste_logits" in outputs
 
     def test_local_econ(self):
-        from src.models.baselines.local_econ import LocalEconModel
+        from models.baselines.local_econ import LocalEconModel
 
-        config = make_dummy_config()
-        model = LocalEconModel(config)
+        model = LocalEconModel(
+            bio_input_dim=30, econ_input_dim=15, latent_dim=64, dropout=0.1,
+        )
         batch = make_dummy_batch()
-        outputs = model(batch)
+        model.eval()
+        with torch.no_grad():
+            outputs = model(batch)
         assert "waste_logits" in outputs
 
     def test_geo_gat(self):
-        from src.models.baselines.geo_gat import GeoGATModel
+        from models.baselines.geo_gat import GeoGATModel
 
-        config = make_dummy_config()
-        model = GeoGATModel(config)
+        model = GeoGATModel(
+            bio_input_dim=30, econ_input_dim=15, hist_dim=10,
+            latent_dim=64, dropout=0.1,
+        )
         batch = make_dummy_batch()
-        outputs = model(batch)
+        model.eval()
+        with torch.no_grad():
+            outputs = model(batch)
         assert "waste_logits" in outputs
         assert "attention_weights" in outputs
 
     def test_symmetric_ecmp(self):
-        from src.models.baselines.symmetric_ecmp import SymmetricECMPModel
+        from models.baselines.symmetric_ecmp import SymmetricECMPModel
 
-        config = make_dummy_config()
-        model = SymmetricECMPModel(config)
+        model = SymmetricECMPModel(
+            bio_input_dim=30, econ_input_dim=15, hist_dim=10,
+            latent_dim=64, dropout=0.1,
+        )
         batch = make_dummy_batch()
-        outputs = model(batch)
+        model.eval()
+        with torch.no_grad():
+            outputs = model(batch)
         assert "waste_logits" in outputs

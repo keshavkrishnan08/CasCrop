@@ -68,7 +68,7 @@ def compute_binary_metrics(
         "precision": precision_score(y_true, y_pred, zero_division=0),
         "recall": recall_score(y_true, y_pred, zero_division=0),
         "brier_score": brier_score_loss(y_true, y_prob),
-        "log_loss": log_loss(y_true, y_prob, eps=1e-7),
+        "log_loss": log_loss(y_true, np.clip(y_prob, 1e-7, 1 - 1e-7)),
         "ece": expected_calibration_error(y_true, y_prob),
     }
     return metrics

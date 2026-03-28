@@ -4,23 +4,28 @@ Verifies gradient reversal, discriminator training, and
 the overall disentanglement loss computation.
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
 import pytest
 import torch
 
 
 class TestGradientReversal:
     def test_forward_is_identity(self):
-        from src.models.encoders.disentanglement import GradientReversalLayer
+        from models.encoders.disentanglement import GradientReversalFunction
 
         x = torch.randn(16, 64, requires_grad=True)
-        y = GradientReversalLayer.apply(x, 1.0)
+        y = GradientReversalFunction.apply(x, 1.0)
         assert torch.allclose(x, y)
 
     def test_backward_reverses_gradient(self):
-        from src.models.encoders.disentanglement import GradientReversalLayer
+        from models.encoders.disentanglement import GradientReversalFunction
 
         x = torch.randn(16, 64, requires_grad=True)
-        y = GradientReversalLayer.apply(x, 1.0)
+        y = GradientReversalFunction.apply(x, 1.0)
         loss = y.sum()
         loss.backward()
 
@@ -31,7 +36,7 @@ class TestGradientReversal:
 
 class TestDisentanglementModule:
     def test_loss_is_scalar(self):
-        from src.models.encoders.disentanglement import DisentanglementModule
+        from models.encoders.disentanglement import DisentanglementModule
 
         module = DisentanglementModule(latent_dim=64, hidden_dim=128)
         z_bio = torch.randn(16, 64)
@@ -42,7 +47,7 @@ class TestDisentanglementModule:
         assert loss.requires_grad
 
     def test_gradients_flow_to_encoder(self):
-        from src.models.encoders.disentanglement import DisentanglementModule
+        from models.encoders.disentanglement import DisentanglementModule
 
         module = DisentanglementModule(latent_dim=64, hidden_dim=128)
         z_bio = torch.randn(16, 64, requires_grad=True)
@@ -55,7 +60,7 @@ class TestDisentanglementModule:
         assert z_econ.grad is not None
 
     def test_discriminator_accuracy_method(self):
-        from src.models.encoders.disentanglement import DisentanglementModule
+        from models.encoders.disentanglement import DisentanglementModule
 
         module = DisentanglementModule(latent_dim=64, hidden_dim=128)
         z_bio = torch.randn(16, 64)

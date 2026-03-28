@@ -7,7 +7,7 @@ time period so they share graph structure for efficient ECMP).
 
 Usage::
 
-    from cascrop.src.data.dataset import get_dataloaders
+    from data.dataset import get_dataloaders
     train_dl, val_dl, test_dl = get_dataloaders(config)
 """
 
@@ -23,8 +23,8 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from cascrop.src.data.graph_builder import GraphBuilder
-from cascrop.src.data.matcher import (
+from .graph_builder import GraphBuilder
+from .matcher import (
     BIOPHYSICAL_FEATURES,
     ECONOMIC_FEATURES,
     HISTORICAL_FEATURES,
@@ -237,13 +237,13 @@ class CasCropDataset(Dataset):
             "x_bio": x_bio,
             "x_econ": x_econ,
             "x_hist": x_hist,
-            "y_waste": self._y_waste[idx].unsqueeze(0),
-            "y_cause": self._y_cause[idx].unsqueeze(0),
+            "waste_target": self._y_waste[idx].unsqueeze(0),
+            "cause_target": self._y_cause[idx].unsqueeze(0),
             "fips": fips_str,
             "commodity": str(self._commodity[idx]),
             "year": int(self._year[idx]),
             "month": int(self._month[idx]),
-            "price_shock": self._price_shock[idx].unsqueeze(0),
+            "price_shocks": self._price_shock[idx].unsqueeze(0),
             "node_idx": torch.tensor([node_idx], dtype=torch.long),
         }
 
@@ -325,9 +325,9 @@ class CasCropGraphBatch:
         x_bio = torch.stack([s["x_bio"] for s in samples])
         x_econ = torch.stack([s["x_econ"] for s in samples])
         x_hist = torch.stack([s["x_hist"] for s in samples])
-        y_waste = torch.stack([s["y_waste"] for s in samples])
-        y_cause = torch.stack([s["y_cause"] for s in samples])
-        price_shock = torch.stack([s["price_shock"] for s in samples])
+        waste_target = torch.stack([s["waste_target"] for s in samples])
+        cause_target = torch.stack([s["cause_target"] for s in samples])
+        price_shocks = torch.stack([s["price_shocks"] for s in samples])
         node_idx = torch.stack([s["node_idx"] for s in samples])
 
         # Metadata
@@ -395,9 +395,9 @@ class CasCropGraphBatch:
             "x_bio": x_bio,
             "x_econ": x_econ,
             "x_hist": x_hist,
-            "y_waste": y_waste,
-            "y_cause": y_cause,
-            "price_shock": price_shock,
+            "waste_target": waste_target,
+            "cause_target": cause_target,
+            "price_shocks": price_shocks,
             "node_idx": node_idx,
             "fips": fips_list,
             "commodity": commodity_list,
@@ -414,7 +414,7 @@ class CasCropGraphBatch:
                 x=torch.cat([x_bio, x_econ, x_hist], dim=1),
                 edge_index=edge_index,
                 edge_attr=edge_attr.unsqueeze(-1) if edge_attr.ndim == 1 else edge_attr,
-                y=y_waste.squeeze(-1),
+                y=waste_target.squeeze(-1),
             )
 
         return result
