@@ -1,0 +1,8 @@
+# Row 2: Local + Economic — biophysical + economic features, no graph
+_base_: default.yaml
+
+model:
+  name: local_econ
+  use_economic: true
+  use_graph: false
+  use_disentanglement: false

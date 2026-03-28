@@ -1,0 +1,11 @@
+# Row 3: Geographic GAT — standard GAT on geographic adjacency only
+# No economic conditioning on attention
+_base_: default.yaml
+
+model:
+  name: geo_gat
+  use_economic: true
+  use_graph: true
+  graph_type: geographic_only
+  use_ecmp: false
+  use_disentanglement: false

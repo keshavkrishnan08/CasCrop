@@ -1,0 +1,66 @@
+"""Tests for the adversarial disentanglement module.
+
+Verifies gradient reversal, discriminator training, and
+the overall disentanglement loss computation.
+"""
+
+import pytest
+import torch
+
+
+class TestGradientReversal:
+    def test_forward_is_identity(self):
+        from src.models.encoders.disentanglement import GradientReversalLayer
+
+        x = torch.randn(16, 64, requires_grad=True)
+        y = GradientReversalLayer.apply(x, 1.0)
+        assert torch.allclose(x, y)
+
+    def test_backward_reverses_gradient(self):
+        from src.models.encoders.disentanglement import GradientReversalLayer
+
+        x = torch.randn(16, 64, requires_grad=True)
+        y = GradientReversalLayer.apply(x, 1.0)
+        loss = y.sum()
+        loss.backward()
+
+        # Gradient should be -1 * ones (reversed from the +1 * ones forward grad)
+        expected = -torch.ones_like(x)
+        assert torch.allclose(x.grad, expected)
+
+
+class TestDisentanglementModule:
+    def test_loss_is_scalar(self):
+        from src.models.encoders.disentanglement import DisentanglementModule
+
+        module = DisentanglementModule(latent_dim=64, hidden_dim=128)
+        z_bio = torch.randn(16, 64)
+        z_econ = torch.randn(16, 64)
+
+        loss = module(z_bio, z_econ)
+        assert loss.ndim == 0
+        assert loss.requires_grad
+
+    def test_gradients_flow_to_encoder(self):
+        from src.models.encoders.disentanglement import DisentanglementModule
+
+        module = DisentanglementModule(latent_dim=64, hidden_dim=128)
+        z_bio = torch.randn(16, 64, requires_grad=True)
+        z_econ = torch.randn(16, 64, requires_grad=True)
+
+        loss = module(z_bio, z_econ)
+        loss.backward()
+
+        assert z_bio.grad is not None
+        assert z_econ.grad is not None
+
+    def test_discriminator_accuracy_method(self):
+        from src.models.encoders.disentanglement import DisentanglementModule
+
+        module = DisentanglementModule(latent_dim=64, hidden_dim=128)
+        z_bio = torch.randn(16, 64)
+        z_econ = torch.randn(16, 64)
+
+        acc = module.get_discriminator_accuracy(z_bio, z_econ)
+        # Should return a float between 0 and some reasonable value
+        assert isinstance(acc, float)
