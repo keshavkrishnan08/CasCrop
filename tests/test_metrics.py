@@ -1,14 +1,19 @@
 """Tests for evaluation metrics and statistical tests."""
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
 import pytest
 import numpy as np
-from src.evaluation.metrics import (
+from evaluation.metrics import (
     compute_binary_metrics,
     compute_cause_metrics,
     expected_calibration_error,
     aggregate_seed_metrics,
 )
-from src.evaluation.statistical_tests import (
+from evaluation.statistical_tests import (
     delong_test,
     mcnemar_test,
     bootstrap_ci,

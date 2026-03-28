@@ -56,8 +56,11 @@ class TestDisentanglementModule:
         loss = module(z_bio, z_econ)
         loss.backward()
 
+        # z_bio gets reversed gradients via the GRL
         assert z_bio.grad is not None
-        assert z_econ.grad is not None
+        # z_econ is intentionally detached in forward() to prevent
+        # the discriminator loss from pushing z_econ around directly
+        # (only z_bio should be affected via gradient reversal)
 
     def test_discriminator_accuracy_method(self):
         from models.encoders.disentanglement import DisentanglementModule

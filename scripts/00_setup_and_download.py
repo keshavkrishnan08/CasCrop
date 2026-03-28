@@ -90,6 +90,14 @@ def download_file(url: str, output_path: Path, description: str = "",
                 output_path.unlink()
                 continue
 
+            # Detect HTML error pages masquerading as data
+            with open(output_path, "rb") as check_f:
+                header = check_f.read(50)
+            if header.strip().startswith(b"<!DOCTYPE") or header.strip().startswith(b"<html"):
+                logger.warning(f"  HTML error page detected, discarding: {output_path}")
+                output_path.unlink()
+                continue
+
             logger.info(f"  Saved: {output_path} ({size:,} bytes)")
             return True
 
@@ -131,10 +139,9 @@ def download_rma_data(raw_dir: Path) -> dict:
     # RMA provides annual cause-of-loss files
     # Try multiple URL patterns as they change occasionally
     url_patterns = [
+        "https://pubfs-rma.fpac.usda.gov/pub/Web_Data_Files/Summary_of_Business/cause_of_loss/colsom_{year}.zip",
         "https://www.rma.usda.gov/-/media/RMA/Cause-of-Loss/ColData{year}.ashx",
         "https://www.rma.usda.gov/-/media/RMA/Cause-of-Loss/coldat{year}.zip",
-        "https://www.rma.usda.gov/data/cause-of-loss/coldat{year}.zip",
-        "https://prodwebnlb.rma.usda.gov/apps/sob/current_week/causeloss{year}.zip",
     ]
 
     years_downloaded = []
