@@ -1,0 +1,132 @@
+% economic_model.tex — Section 2: Economic Model of Crop Waste Contagion
+% Self-contained section for inclusion in main paper
+
+\section{Economic Model of Crop Waste Contagion}
+\label{sec:economic_model}
+
+Why does a bumper harvest in one county cause crop waste hundreds of miles away?
+Standard agronomic models treat waste as a local phenomenon---drought, pest damage, frost---and ignore the market channel entirely.
+We formalize the economic mechanism that propagates waste across regions, derive testable predictions, and show how these predictions map to specific architectural choices in our graph neural network.
+
+\subsection{Model Setup}
+\label{sec:model_setup}
+
+Consider $N$ agricultural regions (counties) indexed by $i = 1, \ldots, N$.
+Each region $i$ grows a commodity with production quantity $q_i$, determined by biophysical conditions (weather, soil, planted acreage), and faces a harvesting cost $c_i > 0$ encompassing labor, fuel, and equipment.
+The farmer in region $i$ observes a local market price $p_i$ and harvests if and only if revenue exceeds cost:
+\begin{equation}
+\label{eq:harvest_condition}
+p_i \cdot q_i > c_i.
+\end{equation}
+When this condition fails, the standing crop is abandoned---left unharvested and wasted.
+
+The local price depends on aggregate regional supply through a linear inverse demand system:
+\begin{equation}
+\label{eq:price}
+p_i = P^{\mathrm{global}} - \sum_{j=1}^{N} \beta_{ij} \, q_j,
+\end{equation}
+where $P^{\mathrm{global}} > 0$ is the national or world reference price and $\beta_{ij} \geq 0$ captures \emph{market connectivity} between regions $i$ and $j$.
+
+\paragraph{Interpretation of $\beta_{ij}$.}
+The coefficient $\beta_{ij}$ encodes how strongly production in region $j$ depresses the price received by farmers in region $i$.
+Four properties govern its structure:
+\begin{enumerate}[label=(\roman*)]
+    \item $\beta_{ij} > 0$ if and only if regions $i$ and $j$ compete in the same downstream market (shared processors, packers, or distribution channels).
+    \item $\beta_{ij}$ increases with geographic proximity, since transportation costs determine which buyers are accessible.
+    \item $\beta_{ij}$ increases with commodity similarity---two adjacent corn-producing counties interact more strongly than a corn county and a soybean county.
+    \item $\beta_{ij} \approx 0$ for distant or market-disconnected regions.
+\end{enumerate}
+These properties make the matrix $\mathbf{B} = [\beta_{ij}]$ sparse, spatially structured, and commodity-dependent---precisely the adjacency structure our graph model learns from data.
+
+\paragraph{Waste probability.}
+Define the \emph{profit margin} for region $i$ as
+\begin{equation}
+\label{eq:margin}
+\pi_i \;=\; p_i \cdot q_i - c_i \;=\; \left(P^{\mathrm{global}} - \sum_{j} \beta_{ij}\, q_j \right) q_i \;-\; c_i.
+\end{equation}
+Region $i$ wastes its crop whenever $\pi_i \leq 0$.
+In a stochastic setting where $q_j$ is drawn from a distribution $F_j$ (reflecting weather uncertainty), the waste probability is
+\begin{equation}
+\label{eq:waste_prob}
+\Pr(\text{waste}_i) = \Pr\!\left(\pi_i \leq 0\right) = \Pr\!\left(\sum_{j} \beta_{ij}\, q_j \geq P^{\mathrm{global}} - \frac{c_i}{q_i}\right).
+\end{equation}
+
+\subsection{Waste Contagion}
+
+\begin{proposition}[Waste Contagion]
+\label{prop:contagion}
+Let region $j$ experience a positive supply shock: $q_j$ increases to $q_j + \Delta q_j$ with $\Delta q_j > 0$, while all other quantities $\{q_k\}_{k \neq j}$ remain unchanged.
+If $\beta_{ij} > 0$, then the waste probability in region $i$ strictly increases, even when region $i$'s own biophysical conditions are unchanged.
+\end{proposition}
+
+\begin{proof}
+From Equation~\eqref{eq:price}, the price in region $i$ after the shock is
+\[
+p_i' = P^{\mathrm{global}} - \sum_{k \neq j} \beta_{ik}\, q_k - \beta_{ij}(q_j + \Delta q_j) = p_i - \beta_{ij}\, \Delta q_j.
+\]
+Since $\beta_{ij} > 0$ and $\Delta q_j > 0$, we have $p_i' < p_i$.
+The post-shock profit margin becomes
+\[
+\pi_i' = p_i' \cdot q_i - c_i = \pi_i - \beta_{ij}\, \Delta q_j \cdot q_i < \pi_i.
+\]
+Because $q_i > 0$ (region $i$ has a standing crop), the margin drops by the strictly positive quantity $\beta_{ij}\, \Delta q_j \, q_i$.
+Hence $\Pr(\pi_i' \leq 0) > \Pr(\pi_i \leq 0)$, and the waste probability in region $i$ strictly increases.
+\end{proof}
+
+Proposition~\ref{prop:contagion} captures the central paradox of crop waste: good weather in one county can destroy value in another.
+The mechanism is purely economic---no pathogen spreads, no pest migrates.
+A bumper harvest floods shared markets, crashes the local price, and pushes marginal farmers below their break-even threshold.
+The strength of this contagion is governed entirely by $\beta_{ij}$, the market connectivity.
+
+\begin{corollary}[Asymmetric Propagation]
+\label{cor:asymmetry}
+Positive and negative supply shocks in region $j$ have asymmetric effects on waste in region $i$:
+\begin{enumerate}[label=(\alph*)]
+    \item \textbf{Bumper harvest} ($\Delta q_j > 0$): $p_i$ falls by $\beta_{ij}\, \Delta q_j$, \emph{increasing} waste probability in $i$.
+    \item \textbf{Crop failure} ($\Delta q_j < 0$): $p_i$ rises by $\beta_{ij}\, |\Delta q_j|$, \emph{decreasing} waste probability in $i$.
+\end{enumerate}
+Consequently, the effect of neighbor shocks on waste risk is directionally asymmetric: positive shocks are harmful and negative shocks are beneficial to region $i$'s harvest viability.
+\end{corollary}
+
+The proof follows immediately from Proposition~\ref{prop:contagion} by substituting $\Delta q_j < 0$.
+This asymmetry has a direct architectural implication: a predictive model must condition on the \emph{sign} of neighbor shocks, not merely their magnitude.
+Symmetric message-passing---treating $+\Delta q_j$ and $-\Delta q_j$ identically---discards the directional information that distinguishes waste-inducing from waste-relieving shocks.
+This motivates the directional shock conditioning in our Economic Cascade Message Passing (ECMP) layer.
+
+\subsection{Testable Hypotheses}
+\label{sec:hypotheses}
+
+The model generates three sharp predictions that map directly to ablation experiments.
+Each hypothesis corresponds to a specific comparison row in our results table.
+
+\begin{hypothesis}[Graph Structure Improves Prediction]
+\label{hyp:graph}
+Because waste contagion propagates through the connectivity matrix $\mathbf{B}$, models that capture inter-regional dependencies (graph-based) will outperform models that treat each region independently.
+\end{hypothesis}
+
+\noindent\textit{Test.}\; Compare the full ECMP model (Row~5) against region-independent baselines---gradient-boosted trees and standalone neural networks (Rows~1--2).
+If $\mathbf{B}$ is informative, graph models should achieve lower error on out-of-sample waste prediction.
+
+\begin{hypothesis}[Economic Edges Outperform Geographic Proximity]
+\label{hyp:edges}
+Since $\beta_{ij}$ depends on market structure, commodity similarity, and transportation networks---not geographic distance alone---edges derived from economic connectivity will carry more predictive signal than edges based purely on spatial adjacency.
+\end{hypothesis}
+
+\noindent\textit{Test.}\; Compare ECMP with learned economic edges (Row~5) against a geographic-only graph model using $k$-nearest spatial neighbors (Row~3).
+A significant gap confirms that market structure, not mere proximity, drives contagion.
+
+\begin{hypothesis}[Directional Conditioning Captures Asymmetry]
+\label{hyp:asymmetry}
+By Corollary~\ref{cor:asymmetry}, positive and negative neighbor shocks have opposite effects on waste risk.
+Models that condition on shock direction---distinguishing surplus from deficit signals---will outperform symmetric alternatives that aggregate neighbor information without regard to sign.
+\end{hypothesis}
+
+\noindent\textit{Test.}\; Compare ECMP with directional shock conditioning (Row~5) against a symmetric message-passing variant (Row~4).
+If the asymmetry from Corollary~\ref{cor:asymmetry} matters empirically, directional conditioning should yield measurable gains.
+
+\paragraph{From theory to architecture.}
+These three hypotheses jointly motivate every key design choice in ECMP\@.
+Hypothesis~\ref{hyp:graph} justifies graph neural networks over tabular baselines.
+Hypothesis~\ref{hyp:edges} drives our economic edge construction---using commodity flows, processor locations, and trade data rather than Euclidean distance.
+Hypothesis~\ref{hyp:asymmetry} motivates the signed message-passing mechanism that separates surplus and deficit channels during neighborhood aggregation.
+Section~\ref{sec:methods} details how we translate each theoretical requirement into a concrete architectural component.
