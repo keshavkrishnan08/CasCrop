@@ -18,10 +18,10 @@ from sklearn.metrics import (
 )
 from torch.utils.data import DataLoader
 
-from cascrop.src.training.early_stopping import EarlyStopping
-from cascrop.src.training.losses import CombinedLoss
-from cascrop.src.training.optimizers import build_optimizer
-from cascrop.src.training.schedulers import build_scheduler
+from .early_stopping import EarlyStopping
+from .losses import CombinedLoss
+from .optimizers import build_optimizer
+from .schedulers import build_scheduler
 
 logger = logging.getLogger(__name__)
 

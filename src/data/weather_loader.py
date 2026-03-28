@@ -30,7 +30,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from cascrop.src.data.utils import (
+from .utils import (
     STATE_FIPS_TO_NAME,
     create_retry_session,
     ensure_directory,
@@ -596,7 +596,7 @@ class NOAAWeatherLoader:
         Returns:
             DataFrame with all fips_all x year x month combinations filled.
         """
-        from cascrop.src.data.utils import fips_to_latlon
+        from .utils import fips_to_latlon
 
         coords = fips_to_latlon(fips_all)
         weather_cols = [c for c in df.columns if c not in ("fips", "year", "month")]

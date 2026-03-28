@@ -24,7 +24,7 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 
-from cascrop.src.data.utils import (
+from .utils import (
     STATE_FIPS_TO_NAME,
     create_retry_session,
     ensure_directory,
