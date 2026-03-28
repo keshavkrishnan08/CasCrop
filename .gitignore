@@ -1,0 +1,36 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Data (too large for git)
+data/raw/
+data/processed/
+data/splits/
+data/graphs/
+
+# Model checkpoints
+checkpoints/
+logs/
+wandb/
+
+# Results (regenerated from pipeline)
+results/
+
+# Environment
+.env
+.env.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
