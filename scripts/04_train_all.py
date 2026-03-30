@@ -515,16 +515,17 @@ def main():
         build_tensors(features, labels, stats, groups, fips_to_idx)
 
     # Create datasets
-    def make_loader(indices, shuffle=False):
+    def make_loader(indices, shuffle=False, drop_last=False):
         idx = torch.tensor(indices)
         ds = CropDataset(
             x_bio[idx], x_econ[idx], x_hist[idx],
             y_waste[idx], y_cause[idx], price_shocks[idx], node_idx[idx],
         )
         return DataLoader(ds, batch_size=args.batch_size, shuffle=shuffle,
-                         drop_last=False, num_workers=0, pin_memory=torch.cuda.is_available())
+                         drop_last=drop_last, num_workers=0, pin_memory=torch.cuda.is_available())
 
-    train_loader = make_loader(splits["train"], shuffle=True)
+    # drop_last=True for training to avoid batch_size=1 crashing BatchNorm
+    train_loader = make_loader(splits["train"], shuffle=True, drop_last=True)
     val_loader = make_loader(splits["val"])
     test_loader = make_loader(splits["test"])
 
