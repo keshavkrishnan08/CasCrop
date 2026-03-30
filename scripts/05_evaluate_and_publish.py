@@ -196,27 +196,43 @@ def main():
     # ── Hypothesis Verification ──────────────────────────────────────
     logger.info("\n=== HYPOTHESIS VERIFICATION ===")
 
-    cascrop_auc = summary[summary["Model"].str.contains("CasCrop")]["auc_mean"].values[0]
-    local_auc = summary[summary["Model"].str.contains("Local Only")]["auc_mean"].values[0]
-    geo_auc = summary[summary["Model"].str.contains("Geographic")]["auc_mean"].values[0]
-    sym_auc = summary[summary["Model"].str.contains("Symmetric")]["auc_mean"].values[0]
+    def _safe_auc(pattern: str) -> float | None:
+        """Extract auc_mean for a model, returning None if not found."""
+        vals = summary[summary["Model"].str.contains(pattern)]["auc_mean"].values
+        return float(vals[0]) if len(vals) > 0 else None
 
-    h1_delta = cascrop_auc - local_auc
-    h2_delta = cascrop_auc - geo_auc
-    h3_delta = cascrop_auc - sym_auc
+    cascrop_auc = _safe_auc("CasCrop")
+    local_auc = _safe_auc("Local Only")
+    geo_auc = _safe_auc("Geographic")
+    sym_auc = _safe_auc("Symmetric")
 
-    logger.info(f"  H1: Graph > Independent:  +{h1_delta:.3f} AUC ({'CONFIRMED' if h1_delta > 0 else 'FAILED'})")
-    logger.info(f"  H2: Econ > Geo-only:      +{h2_delta:.3f} AUC ({'CONFIRMED' if h2_delta > 0 else 'FAILED'})")
-    logger.info(f"  H3: Asymmetric > Symm:    +{h3_delta:.3f} AUC ({'CONFIRMED' if h3_delta > 0 else 'FAILED'})")
+    hypotheses = {}
+
+    if cascrop_auc is not None and local_auc is not None:
+        h1_delta = cascrop_auc - local_auc
+        logger.info(f"  H1: Graph > Independent:  +{h1_delta:.3f} AUC ({'CONFIRMED' if h1_delta > 0 else 'FAILED'})")
+        hypotheses["H1_graph_vs_independent"] = {"delta": h1_delta, "confirmed": h1_delta > 0}
+    else:
+        logger.info("  H1: Graph > Independent:  SKIPPED (missing model results)")
+
+    if cascrop_auc is not None and geo_auc is not None:
+        h2_delta = cascrop_auc - geo_auc
+        logger.info(f"  H2: Econ > Geo-only:      +{h2_delta:.3f} AUC ({'CONFIRMED' if h2_delta > 0 else 'FAILED'})")
+        hypotheses["H2_econ_vs_geo"] = {"delta": h2_delta, "confirmed": h2_delta > 0}
+    else:
+        logger.info("  H2: Econ > Geo-only:      SKIPPED (missing model results)")
+
+    if cascrop_auc is not None and sym_auc is not None:
+        h3_delta = cascrop_auc - sym_auc
+        logger.info(f"  H3: Asymmetric > Symm:    +{h3_delta:.3f} AUC ({'CONFIRMED' if h3_delta > 0 else 'FAILED'})")
+        hypotheses["H3_asymmetric_vs_symmetric"] = {"delta": h3_delta, "confirmed": h3_delta > 0}
+    else:
+        logger.info("  H3: Asymmetric > Symm:    SKIPPED (missing model results)")
 
     # Save summary
     summary_out = {
         "ablation_table": summary[["Model", "AUC-ROC", "F1", "AUC-PR", "Params"]].to_dict(orient="records"),
-        "hypotheses": {
-            "H1_graph_vs_independent": {"delta": h1_delta, "confirmed": h1_delta > 0},
-            "H2_econ_vs_geo": {"delta": h2_delta, "confirmed": h2_delta > 0},
-            "H3_asymmetric_vs_symmetric": {"delta": h3_delta, "confirmed": h3_delta > 0},
-        },
+        "hypotheses": hypotheses,
         "best_model": "cascrop",
         "best_auc": cascrop_auc,
     }
