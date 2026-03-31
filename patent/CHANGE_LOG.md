@@ -190,3 +190,76 @@ All development artifacts are stored in a git repository with cryptographic comm
    - Agricultural data fusion with adversarial disentanglement
 
 5. **Trade secret consideration:** The specific hyperparameters (shock_embed_dim=8, num_heads=4, disentangle_lambda=0.1) and training procedures (warmup schedule, discriminator ratio) could be maintained as trade secrets rather than disclosed in the patent, if counsel advises.
+
+---
+
+### Phase 3 — Temporal Cascade Architecture
+
+**Date:** 2026-03-31
+**Git Commit:** (to be recorded upon commit)
+**Description:** Major architectural evolution from single-snapshot to temporal cascade processing.
+
+#### 3.1 Key Inventive Insight: Contagion is Temporal
+
+The initial ECMP architecture processed a single snapshot of the agricultural network. Experimental results (Phase 2) revealed that at annual county-level resolution, the asymmetric shock conditioning did not produce statistically significant improvements over simpler graph models (GeoGAT, Symmetric ECMP). All graph models achieved ~0.937-0.942 AUC.
+
+**Root cause analysis revealed two issues:**
+1. Annual price shocks were identical for all counties growing the same commodity (33 unique values across 53,686 samples). The ECMP shock embedding computed the same φ for every source node, reducing it to a constant bias.
+2. Economic contagion operates over weeks to months, not years. Annual aggregation destroyed the temporal signal the architecture was designed to capture.
+
+**The inventive insight:** Contagion is fundamentally a temporal phenomenon — a shock at county A in month t propagates to county B in month t+1 through t+3. Modeling this requires processing a SEQUENCE of monthly graphs, not a single snapshot. The architecture must maintain a "contagion memory" that accumulates shock signals over time.
+
+#### 3.2 Novel Mechanism: Temporal Cascade ECMP
+
+**File:** `src/models/temporal_cascrop.py`
+
+A recurrent graph neural network that processes T monthly observations sequentially:
+
+```
+For each month t = 1, ..., T:
+    1. Encode month t's biophysical and economic features
+    2. Run ECMP message passing with month t's county-specific price shocks
+    3. Update hidden state: s_t = GRU(s_{t-1}, ecmp_output_t)
+    4. The GRU state carries contagion memory across months
+Predict from final state s_T
+```
+
+**Novel components:**
+- **TemporalECMPCell:** Combines shock-conditioned graph message passing (ECMP) with a GRU temporal state update at each time step. No prior work combines asymmetric shock-conditioned graph attention with recurrent temporal processing.
+- **Contagion momentum:** The GRU hidden state naturally accumulates contagion signals. A county receiving persistent negative shock signals over June-July-August develops an amplified risk state by September. This emergence of "contagion momentum" from the recurrent architecture has no analogue in existing graph neural network literature.
+- **Shock-gated message scaling:** Messages are multiplicatively scaled by `gate = 1 + tanh(W_gate · φ(Δp))`, where φ uses separate W_pos and W_neg transformations. The gate directly controls how much signal propagates through each edge at each time step.
+
+#### 3.3 County-Specific Economic Shocks
+
+**File:** `scripts/02_process_monthly.py`
+
+Resolved the identical-shock problem by computing per-county economic exposure:
+```
+county_shock = price_change_monthly × county_production_share + 0.5 × yield_deviation
+```
+This produces 34,907+ unique shock values (was 33 with national prices), giving ECMP meaningful per-county variation at each time step.
+
+#### 3.4 Monthly Resolution Data Pipeline
+
+Reprocessed all data at county-crop-month granularity:
+- RMA claims parsed by month_of_loss (was aggregated to year)
+- Weather features extracted per month from nClimDiv (was growing-season average)
+- Price shocks computed month-over-month (was year-over-year)
+- Expected ~600K+ samples (was 54K)
+
+#### 3.5 Ablation Design (5 Temporal Rows)
+
+| Row | Model | Tests |
+|-----|-------|-------|
+| T1 | Temporal Local (GRU, no graph) | Temporal processing alone |
+| T2 | Temporal GAT (GRU + standard GAT) | Graph adds value? |
+| T3 | Temporal Symmetric (GRU + symmetric ECMP) | Shock conditioning adds value? |
+| **T4** | **Temporal CasCrop (GRU + asymmetric ECMP)** | **Asymmetry matters?** |
+
+#### 3.6 Patent Claim Updates
+
+This phase adds:
+- **Claim 4 (Temporal):** A method for temporal graph neural network message passing comprising processing a sequence of graph snapshots at successive time periods, wherein at each time period (a) shock-conditioned message passing is performed using that period's exogenous shock values, and (b) node hidden states are updated via a recurrent unit that receives the message passing output and the previous hidden state, thereby accumulating contagion signals across time periods.
+- **Dependent claims:** Contagion momentum detection, multi-horizon shock decomposition, temporal attention visualization for cascade reconstruction.
+
+---
