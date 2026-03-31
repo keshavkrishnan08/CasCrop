@@ -6,7 +6,11 @@
 \toprule
 Model & AUC-ROC & F1 & AUC-PR & Params \\
 \midrule
-  Row 5: Full CasCrop & \textbf{0.932 ± nan} & 0.815 ± nan & 0.913 ± nan & 204,231 \\
+  Row 1: Local Only (Bio MLP) & 0.851 ± 0.002 & 0.738 ± 0.004 & 0.809 ± 0.004 & 0 \\
+  Row 2: Local + Economic & 0.840 ± 0.008 & 0.678 ± 0.021 & 0.804 ± 0.008 & 0 \\
+  Row 3: Geographic GAT & 0.938 ± 0.002 & 0.813 ± 0.018 & 0.911 ± 0.005 & 0 \\
+  Row 4: Symmetric ECMP & \textbf{0.938 ± 0.003} & 0.816 ± 0.013 & 0.913 ± 0.005 & 0 \\
+  Row 5: Full CasCrop & 0.937 ± 0.003 & 0.780 ± 0.030 & 0.908 ± 0.006 & 204,231 \\
 \bottomrule
 \end{tabular}
 \end{table*}

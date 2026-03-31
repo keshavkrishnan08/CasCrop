@@ -408,6 +408,35 @@ def merge_all(
     # For simplicity, use the full historical average but shift by 1 year
     merged = merged.merge(hist, on=["fips", "commodity"], how="left")
 
+    # ── County-specific economic shock ──
+    # National price_change_pct is identical for all counties growing the same crop.
+    # ECMP needs per-county variation to learn asymmetric contagion patterns.
+    # County economic exposure = national price change × county production share
+    # Plus: county-specific yield deviation from trend as local shock signal.
+    if "production" in merged.columns and "price_change_pct" in merged.columns:
+        # County production share within each commodity-year
+        total_prod = merged.groupby(["commodity", "year"])["production"].transform("sum")
+        merged["county_prod_share"] = merged["production"] / total_prod.clip(lower=1)
+
+        # County-specific economic shock: price change × production exposure
+        merged["county_econ_shock"] = (
+            merged["price_change_pct"].fillna(0) * merged["county_prod_share"].fillna(0)
+        )
+
+        # Yield deviation: county yield vs commodity-year mean (local stress signal)
+        yield_mean = merged.groupby(["commodity", "year"])["yield_value"].transform("mean")
+        yield_std = merged.groupby(["commodity", "year"])["yield_value"].transform("std").clip(lower=0.1)
+        merged["yield_deviation"] = (merged["yield_value"] - yield_mean) / yield_std
+
+        # Combined county shock: economic exposure + yield anomaly
+        # This varies across counties even within the same commodity-year
+        merged["county_shock"] = (
+            merged["county_econ_shock"] + 0.5 * merged["yield_deviation"].fillna(0)
+        )
+
+        logger.info(f"  County shocks: {merged['county_shock'].nunique()} unique values "
+                    f"(was {merged['price_change_pct'].nunique()} with national-only)")
+
     # Fill missing
     numeric_cols = merged.select_dtypes(include=[np.number]).columns
     merged[numeric_cols] = merged[numeric_cols].fillna(merged[numeric_cols].median())
@@ -471,6 +500,7 @@ def get_feature_groups(df: pd.DataFrame) -> dict:
     econ_cols = [c for c in df.columns if c in [
         "price_mean", "price_std", "price_min", "price_max",
         "price_change_pct", "price_volatility",
+        "county_prod_share", "county_econ_shock",
     ]]
 
     hist_cols = [c for c in df.columns if c in [

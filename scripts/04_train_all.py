@@ -102,14 +102,18 @@ def build_tensors(features, labels, stats, groups, fips_to_idx):
     y_waste = torch.from_numpy(labels["waste"].values.astype(np.float32)).unsqueeze(1)
     y_cause = torch.from_numpy(labels["cause_idx"].values.astype(np.int64))
 
-    # Price shocks
-    if "price_change_pct" in features.columns:
-        shock_vals = features["price_change_pct"].fillna(0).values.astype(np.float32)
-        # Clip extreme shocks to prevent NaN in attention
+    # Price shocks — use county-specific shock if available (varies per county)
+    # Falls back to national price_change_pct (identical across counties — bad for ECMP)
+    shock_col = "county_shock" if "county_shock" in features.columns else "price_change_pct"
+    if shock_col in features.columns:
+        shock_vals = features[shock_col].fillna(0).values.astype(np.float32)
         shock_vals = np.clip(shock_vals, -5.0, 5.0)
         price_shocks = torch.from_numpy(shock_vals).unsqueeze(1)
+        n_unique = len(np.unique(np.round(shock_vals, 6)))
+        logger.info(f"  Shock signal: {shock_col} ({n_unique} unique values)")
     else:
         price_shocks = torch.zeros(len(features), 1)
+        logger.info(f"  Shock signal: zeros (no price data)")
 
     # Node indices
     node_idx = torch.from_numpy(
@@ -215,7 +219,7 @@ def create_model(name: str, bio_dim: int, econ_dim: int, hist_dim: int):
 # ── Training Loop ────────────────────────────────────────────────────
 
 def train_one_epoch(model, loader, optimizer, loss_fn, edge_index, edge_weight,
-                    device, clip_norm=1.0):
+                    device, clip_norm=1.0, dis_lambda=0.1):
     """Train for one epoch with vectorized edge filtering and NaN detection."""
     model.train()
     total_loss = 0
@@ -254,7 +258,7 @@ def train_one_epoch(model, loader, optimizer, loss_fn, edge_index, edge_weight,
         if isinstance(dis_loss, (int, float)):
             dis_loss = torch.tensor(dis_loss, device=device)
 
-        loss = waste_loss + 0.3 * cause_loss + 0.1 * dis_loss
+        loss = waste_loss + 0.3 * cause_loss + dis_lambda * dis_loss
 
         # NaN detection
         if torch.isnan(loss) or torch.isinf(loss):
@@ -380,14 +384,19 @@ def train_model(
     best_epoch = 0
     wait = 0
     best_state = None
+    WARMUP_EPOCHS = 5  # Train without disentanglement for first N epochs
 
     for epoch in range(epochs):
         t0 = time.time()
+
+        # Disentanglement warmup: λ=0 for first WARMUP_EPOCHS, then ramp to 0.1
+        dis_lambda = 0.0 if epoch < WARMUP_EPOCHS else 0.1
 
         try:
             train_loss = train_one_epoch(
                 model, train_loader, optimizer, loss_fn,
                 edge_index, edge_weight, device,
+                dis_lambda=dis_lambda,
             )
         except RuntimeError as e:
             if "out of memory" in str(e):
