@@ -488,7 +488,7 @@ def main():
     device = f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu"
     logger.info(f"Device: {device}")
     if torch.cuda.is_available():
-        mem = torch.cuda.get_device_properties(args.gpu).total_mem / 1e9
+        mem = torch.cuda.get_device_properties(args.gpu).total_memory / 1e9
         logger.info(f"GPU: {torch.cuda.get_device_name(args.gpu)} ({mem:.1f} GB)")
         if mem < 8:
             logger.info("Low GPU memory detected, reducing batch size to 256")
