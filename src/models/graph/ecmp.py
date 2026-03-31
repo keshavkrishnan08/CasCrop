@@ -47,7 +47,7 @@ class ECMPLayer(nn.Module):
         out_dim: int,
         num_heads: int = 4,
         dropout: float = 0.3,
-        shock_embed_dim: int = 8,
+        shock_embed_dim: int = 32,
         asymmetric: bool = True,
         concat_heads: bool = True,
         edge_feat_dim: int = 0,
@@ -71,12 +71,22 @@ class ECMPLayer(nn.Module):
         self.att = nn.Parameter(torch.empty(num_heads, att_input_dim))
         nn.init.xavier_uniform_(self.att.unsqueeze(0))  # treat as (1, H, att_dim)
 
-        # Asymmetric shock embedding
+        # Asymmetric shock embedding — larger dim (32) for stronger signal
         if asymmetric:
             self.W_pos = nn.Linear(1, shock_embed_dim, bias=False)
             self.W_neg = nn.Linear(1, shock_embed_dim, bias=False)
         else:
             self.W_sym = nn.Linear(1, shock_embed_dim, bias=False)
+
+        # Shock-gated message scaling: modulates message magnitude by shock.
+        # Architecture: shock embedding → per-head gain factor.
+        # Uses tanh (not sigmoid) so the shock can both amplify AND suppress.
+        # Negative shocks (price drops) should amplify contagion.
+        # Positive shocks (price rises) should suppress contagion.
+        self.shock_gate = nn.Linear(shock_embed_dim, num_heads, bias=True)
+        # Initialize bias to 0 and small weights so gate starts near 1.0
+        nn.init.xavier_uniform_(self.shock_gate.weight, gain=0.5)
+        nn.init.zeros_(self.shock_gate.bias)
 
         # Optional edge feature projection
         if edge_feat_dim > 0:
@@ -177,9 +187,20 @@ class ECMPLayer(nn.Module):
         alpha = exp_e / (sum_exp[dst] + 1e-16)         # (E, H)
         alpha = self.attn_drop(alpha)                  # (E, H)
 
-        # 6. Weighted aggregation --------------------------------------------------
-        # Messages: alpha * Wh_j, then scatter-add to destinations
-        msg = alpha.unsqueeze(-1) * Wh_j               # (E, H, D)
+        # 6. Shock-gated message scaling -------------------------------------------
+        # The shock gate directly modulates message magnitude per edge.
+        # g = 1 + tanh(linear(phi_j)):
+        #   - zero shock → tanh(0)=0 → gate=1.0 (pass through unchanged)
+        #   - negative shock → tanh(neg)→neg → gate<1.0 (or >1.0, learned)
+        #   - positive shock → tanh(pos)→pos → gate>1.0 (or <1.0, learned)
+        # The asymmetry in W_pos/W_neg means phi differs for +/- shocks,
+        # so the gate response is genuinely asymmetric.
+        gate_raw = self.shock_gate(phi_j)                # (E, H)
+        gate = 1.0 + torch.tanh(gate_raw)               # (E, H) in [0, 2]
+
+        # 7. Weighted aggregation --------------------------------------------------
+        # Messages: alpha * gate * Wh_j
+        msg = (alpha * gate).unsqueeze(-1) * Wh_j       # (E, H, D)
         out = torch.zeros(N, H, D, device=x.device, dtype=x.dtype)
         out.scatter_add_(0, dst.view(-1, 1, 1).expand(-1, H, D), msg)  # (N, H, D)
 
