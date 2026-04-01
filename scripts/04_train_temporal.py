@@ -186,9 +186,10 @@ def train_model(model_name, seed, train_loader, val_loader, test_loader,
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=50)
-    # Compute pos_weight for class imbalance
-    waste_rate = y_waste.mean().item()
-    pos_weight = torch.tensor([(1 - waste_rate) / waste_rate]).to(device)
+    # Compute pos_weight from train loader for class imbalance
+    all_y = torch.cat([b["waste_target"] for b in train_loader])
+    waste_rate = all_y.mean().item()
+    pos_weight = torch.tensor([(1 - waste_rate) / max(waste_rate, 0.01)]).to(device)
     loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
     best_auc, best_epoch, wait, best_state = 0, 0, 0, None
