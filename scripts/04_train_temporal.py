@@ -91,7 +91,7 @@ class MonthlyDataset(Dataset):
 # ── Subgraph ─────────────────────────────────────────────────────────
 
 def build_local_subgraph(batch_node_ids, edge_index, device, batch_size):
-    unique_nodes = torch.unique(batch_node_ids)
+    unique_nodes = torch.unique(batch_node_ids).cpu()
     src, dst = edge_index[0], edge_index[1]
     src_in = torch.isin(src, unique_nodes)
     dst_in = torch.isin(dst, unique_nodes)
