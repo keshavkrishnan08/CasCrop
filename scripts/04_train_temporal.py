@@ -91,18 +91,23 @@ class MonthlyDataset(Dataset):
 # ── Subgraph ─────────────────────────────────────────────────────────
 
 def build_local_subgraph(batch_node_ids, edge_index, device, batch_size):
-    unique_nodes = torch.unique(batch_node_ids).cpu()
+    node_ids = batch_node_ids.cpu()
+    unique_nodes = torch.unique(node_ids)
     src, dst = edge_index[0], edge_index[1]
     src_in = torch.isin(src, unique_nodes)
     dst_in = torch.isin(dst, unique_nodes)
     edge_mask = src_in & dst_in
     if edge_mask.any():
-        max_node = unique_nodes.max().item() + 1
-        g2l = torch.full((max_node,), -1, dtype=torch.long)
-        g2l[unique_nodes] = torch.arange(len(unique_nodes))
-        local_src = g2l[src[edge_mask]].clamp(0, batch_size - 1)
-        local_dst = g2l[dst[edge_mask]].clamp(0, batch_size - 1)
-        return torch.stack([local_src, local_dst]).to(device)
+        # Map county IDs to actual batch positions (first occurrence)
+        max_id = unique_nodes.max().item() + 1
+        county_to_pos = torch.full((max_id,), -1, dtype=torch.long)
+        for i in range(len(node_ids) - 1, -1, -1):
+            county_to_pos[node_ids[i]] = i
+        local_src = county_to_pos[src[edge_mask]]
+        local_dst = county_to_pos[dst[edge_mask]]
+        valid = (local_src >= 0) & (local_dst >= 0)
+        if valid.any():
+            return torch.stack([local_src[valid], local_dst[valid]]).to(device)
     return torch.stack([torch.arange(batch_size), torch.arange(batch_size)]).to(device)
 
 
