@@ -166,7 +166,63 @@ MODEL_REGISTRY = {
     "symmetric_diff": "R3",
     "polarity_routed": "R4",
     "prcn": "R5",
+    "temporal_prcn": "R6-Temporal",
 }
+
+TEMPORAL_WINDOW = 6  # months of lookback
+
+
+class SequenceDataset(Dataset):
+    """Returns (T, D) sequences per sample for temporal models.
+    Uses FULL tensors + global indices to avoid subset/global mismatch."""
+    def __init__(self, x_bio, x_econ, x_hist, x_cascade, y_waste, y_cause, seq_map, indices):
+        self.x_bio = x_bio; self.x_econ = x_econ; self.x_hist = x_hist
+        self.x_cascade = x_cascade; self.y_waste = y_waste; self.y_cause = y_cause
+        self.seq_map = seq_map  # (N_total, W) — global indices, -1 for padding
+        self.indices = indices  # global indices for this split
+
+    def __len__(self): return len(self.indices)
+
+    def __getitem__(self, idx):
+        gi = self.indices[idx]  # global index
+        seq = self.seq_map[gi]  # (W,) — global indices
+        W = len(seq)
+        bio_seq = torch.zeros(W, self.x_bio.size(1))
+        econ_seq = torch.zeros(W, self.x_econ.size(1))
+        casc_seq = torch.zeros(W, self.x_cascade.size(1))
+        for t in range(W):
+            if seq[t] >= 0:
+                bio_seq[t] = self.x_bio[seq[t]]
+                econ_seq[t] = self.x_econ[seq[t]]
+                casc_seq[t] = self.x_cascade[seq[t]]
+        return {
+            "x_bio": bio_seq, "x_econ": econ_seq, "x_hist": self.x_hist[gi],
+            "x_cascade": casc_seq, "waste_target": self.y_waste[gi],
+            "cause_target": self.y_cause[gi],
+        }
+
+
+def build_sequence_map(features_df, window=6):
+    """Build (N, W) index array: for each sample, its temporal lookback window."""
+    import pandas as pd
+    df = features_df[["fips", "commodity", "year", "month"]].copy()
+    df["_orig"] = np.arange(len(df))
+    df = df.sort_values(["fips", "commodity", "year", "month"]).reset_index(drop=True)
+    key = df["fips"].astype(str) + "_" + df["commodity"]
+    is_new = (key != key.shift()).values
+    orig = df["_orig"].values
+
+    seq_map = np.full((len(features_df), window), -1, dtype=np.int64)
+    buf = []
+    for i in range(len(df)):
+        if is_new[i]:
+            buf = []
+        buf.append(orig[i])
+        start = max(0, len(buf) - window)
+        win = buf[start:]
+        offset = window - len(win)
+        seq_map[orig[i], offset:] = win
+    return torch.from_numpy(seq_map)
 
 
 def create_model(name, bio_dim, econ_dim, hist_dim, cascade_dim):
@@ -181,6 +237,9 @@ def create_model(name, bio_dim, econ_dim, hist_dim, cascade_dim):
     elif name == "prcn":
         from models.prcn import PRCN
         return PRCN(bio_dim, econ_dim, hist_dim, cascade_dim)
+    elif name == "temporal_prcn":
+        from models.prcn import TemporalPRCN
+        return TemporalPRCN(bio_dim, econ_dim, hist_dim, cascade_dim)
     else:
         raise ValueError(f"Unknown model: {name}")
 
@@ -308,9 +367,22 @@ def main():
 
     x_bio, x_econ, x_hist, x_cascade, y_waste, y_cause = build_tensors(features, labels, stats, groups)
 
+    # Standard loaders (snapshot models)
     def make_loader(indices, shuffle=False):
         idx = torch.tensor(indices)
         ds = PRCNDataset(x_bio[idx], x_econ[idx], x_hist[idx], x_cascade[idx], y_waste[idx], y_cause[idx])
+        return DataLoader(ds, batch_size=args.batch_size, shuffle=shuffle, drop_last=shuffle, num_workers=0)
+
+    # Temporal loaders (sequence models)
+    seq_map = None
+    def make_seq_loader(indices, shuffle=False):
+        nonlocal seq_map
+        if seq_map is None:
+            logger.info("Building temporal sequence map...")
+            seq_map = build_sequence_map(features, TEMPORAL_WINDOW)
+            logger.info(f"Sequence map: {seq_map.shape}")
+        ds = SequenceDataset(x_bio, x_econ, x_hist, x_cascade,
+                             y_waste, y_cause, seq_map, indices)
         return DataLoader(ds, batch_size=args.batch_size, shuffle=shuffle, drop_last=shuffle, num_workers=0)
 
     train_loader = make_loader(splits["train"], shuffle=True)
@@ -322,6 +394,17 @@ def main():
     all_results = []
 
     for model_name in models:
+        # Switch to temporal loaders for temporal models
+        if model_name == "temporal_prcn":
+            train_loader = make_seq_loader(splits["train"], shuffle=True)
+            val_loader = make_seq_loader(splits["val"])
+            test_loader = make_seq_loader(splits["test"])
+        elif model_name != "temporal_prcn" and seq_map is not None:
+            # Switch back to standard loaders
+            train_loader = make_loader(splits["train"], shuffle=True)
+            val_loader = make_loader(splits["val"])
+            test_loader = make_loader(splits["test"])
+
         logger.info(f"\n{'='*50}\n{MODEL_REGISTRY.get(model_name, '??')}: {model_name}\n{'='*50}")
         for seed in seeds:
             ckpt_path = CKPT / f"prcn_{model_name}_seed{seed}.pt"

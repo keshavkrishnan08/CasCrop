@@ -184,6 +184,26 @@ def main():
         features, A_geo, commodity_graphs, fips_to_idx
     )
 
+    # === CROSS-COMMODITY INTERFERENCE ===
+    logger.info("Computing cross-commodity interference...")
+    price_col = "county_shock" if "county_shock" in enriched.columns else "price_change_1m"
+    agg = enriched.groupby(["fips", "year", "month"])[price_col].agg(
+        _total_sum="sum", _total_count="count", _total_min="min", _total_max="max"
+    ).reset_index()
+    enriched = enriched.merge(agg, on=["fips", "year", "month"])
+    # Mean of OTHER commodities' prices in same county-month
+    enriched["cross_other_mean"] = np.where(
+        enriched["_total_count"] > 1,
+        (enriched["_total_sum"] - enriched[price_col].fillna(0)) / (enriched["_total_count"] - 1),
+        0.0,
+    ).astype(np.float32)
+    # Spread across commodities: high = commodity-specific, low = systemic
+    enriched["cross_spread"] = (enriched["_total_max"] - enriched["_total_min"]).astype(np.float32)
+    enriched.drop(columns=["_total_sum", "_total_count", "_total_min", "_total_max"], inplace=True)
+    cascade_cols += ["cross_other_mean", "cross_spread"]
+    logger.info(f"  cross_other_mean: mean={enriched['cross_other_mean'].mean():.6f}")
+    logger.info(f"  cross_spread: mean={enriched['cross_spread'].mean():.6f}")
+
     # Update feature groups
     with open(DATA / "feature_groups_monthly.json") as f:
         groups = json.load(f)

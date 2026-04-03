@@ -203,3 +203,91 @@ class PRCN(nn.Module):
         fake = self.discriminator(z_econ)
         return (F.binary_cross_entropy_with_logits(real, torch.ones(B, 1, device=z_bio.device)) +
                 F.binary_cross_entropy_with_logits(fake, torch.zeros(B, 1, device=z_bio.device)))
+
+
+class TemporalPRCN(nn.Module):
+    """Temporal PRCN: GRU over monthly cascade sequences.
+
+    Novel: contagion MOMENTUM — sustained multi-hop exposure over T months
+    compounds risk nonlinearly. A county receiving 3+ months of negative
+    cascade signals develops amplified risk that a single-snapshot model misses.
+
+    Processes a window of T monthly observations per county-commodity pair.
+    At each month, the PRCN encoding (vulnerability-routed cascade features)
+    is computed, then the GRU accumulates a "momentum state" across months.
+    """
+
+    def __init__(
+        self,
+        bio_dim: int = 19,
+        econ_dim: int = 8,
+        hist_dim: int = 3,
+        cascade_dim: int = 12,
+        latent_dim: int = 64,
+        dropout: float = 0.3,
+        num_causes: int = 6,
+    ):
+        super().__init__()
+        self.latent_dim = latent_dim
+        self.cascade_dim = cascade_dim
+
+        # Per-timestep encoders (shared across months)
+        self.bio_enc = nn.Sequential(
+            nn.Linear(bio_dim, latent_dim), nn.ReLU(), nn.Dropout(dropout),
+        )
+        self.econ_enc = nn.Sequential(
+            nn.Linear(econ_dim, latent_dim), nn.ReLU(), nn.Dropout(dropout),
+        )
+        self.vuln_router = VulnerabilityRouter(bio_dim, hist_dim, cascade_dim)
+        self.cascade_enc = nn.Sequential(
+            nn.Linear(cascade_dim, latent_dim), nn.ReLU(), nn.Dropout(dropout),
+        )
+
+        # GRU for contagion momentum
+        gru_input = latent_dim * 3  # z_bio + z_econ + z_cascade per month
+        self.gru = nn.GRU(gru_input, latent_dim, batch_first=True)
+
+        # Persistence + prediction
+        self.persistence_head = CascadePersistenceHead()
+        head_input = latent_dim + hist_dim + 1  # gru_hidden + hist + persistence
+        self.waste_head = nn.Sequential(
+            nn.Linear(head_input, 64), nn.ReLU(), nn.Dropout(dropout), nn.Linear(64, 1),
+        )
+        self.cause_head = nn.Sequential(
+            nn.Linear(head_input, 64), nn.ReLU(), nn.Dropout(dropout), nn.Linear(64, num_causes),
+        )
+
+    def forward(self, batch: Dict[str, Any]) -> Dict[str, torch.Tensor]:
+        x_bio = batch["x_bio"]        # (B, T, bio_dim)
+        x_econ = batch["x_econ"]      # (B, T, econ_dim)
+        x_hist = batch["x_hist"]      # (B, hist_dim) — static
+        x_cascade = batch["x_cascade"]  # (B, T, cascade_dim)
+
+        B, T, _ = x_bio.shape
+
+        monthly = []
+        for t in range(T):
+            z_bio = self.bio_enc(x_bio[:, t])
+            z_econ = self.econ_enc(x_econ[:, t])
+            cw = self.vuln_router(x_bio[:, t], x_hist)
+            z_cascade = self.cascade_enc(x_cascade[:, t] * cw)
+            monthly.append(torch.cat([z_bio, z_econ, z_cascade], dim=-1))
+
+        seq = torch.stack(monthly, dim=1)  # (B, T, gru_input)
+        _, h_final = self.gru(seq)          # (1, B, latent_dim)
+        h = h_final.squeeze(0)              # (B, latent_dim)
+
+        # Persistence from last month's decay features
+        n_decay = 4  # last 4 cascade features are decay signatures
+        decay_feats = x_cascade[:, -1, -(n_decay + 2):-2]  # decay columns
+        # Fallback: use last 4 of last month's cascade
+        if decay_feats.shape[-1] != 4:
+            decay_feats = x_cascade[:, -1, -4:]
+        persistence = self.persistence_head(decay_feats)
+
+        h_full = torch.cat([h, x_hist, persistence], dim=-1)
+        return {
+            "waste_logits": self.waste_head(h_full),
+            "cause_logits": self.cause_head(h_full),
+            "disentangle_loss": torch.tensor(0.0, device=h.device),
+        }
