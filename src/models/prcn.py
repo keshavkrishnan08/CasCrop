@@ -137,11 +137,14 @@ class PRCN(nn.Module):
         )
 
         # Novel component 3: cascade persistence score
+        # Decay features are at fixed indices 6-9 (4 features)
+        self.decay_start = 6
+        self.decay_end = 10
         self.persistence_head = CascadePersistenceHead()
 
         # Prediction heads
-        # z_bio + z_econ + z_cascade + hist + persistence_score
-        head_input = latent_dim * 3 + hist_dim + 1
+        # z_bio + z_cascade + hist + persistence_score (skip raw econ — cascade has diffused econ)
+        head_input = latent_dim * 2 + hist_dim + 1
         self.waste_head = nn.Sequential(
             nn.Linear(head_input, 64),
             nn.ReLU(),
@@ -170,22 +173,22 @@ class PRCN(nn.Module):
         x_hist = batch["x_hist"]
         x_cascade = batch["x_cascade"]  # (B, 10): 6 diffusion + 4 decay
 
-        # Encode bio + econ
+        # Encode bio (skip raw econ — cascade features include diffused econ)
         z_bio = self.bio_enc(x_bio)
         z_econ = self.econ_enc(x_econ)
         dis_loss = self._disentangle_loss(z_bio, z_econ)
 
         # Novel: vulnerability-conditioned routing
-        channel_weights = self.vuln_router(x_bio, x_hist)  # (B, 10)
-        x_routed = x_cascade * channel_weights              # element-wise gating
-        z_cascade = self.cascade_enc(x_routed)               # (B, latent_dim)
+        channel_weights = self.vuln_router(x_bio, x_hist)
+        x_routed = x_cascade * channel_weights
+        z_cascade = self.cascade_enc(x_routed)
 
         # Novel: cascade persistence score from decay signatures (indices 6-9)
-        decay_features = x_cascade[:, 6:10]  # 4 decay ratio features
-        persistence = self.persistence_head(decay_features)  # (B, 1)
+        decay_features = x_cascade[:, 6:10]
+        persistence = self.persistence_head(decay_features)
 
-        # Concatenate and predict
-        h = torch.cat([z_bio, z_econ, z_cascade, x_hist, persistence], dim=-1)
+        # Concatenate and predict (bio + cascade + hist + persistence)
+        h = torch.cat([z_bio, z_cascade, x_hist, persistence], dim=-1)
 
         return {
             "waste_logits": self.waste_head(h),

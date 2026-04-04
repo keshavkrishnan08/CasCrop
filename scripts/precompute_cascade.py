@@ -125,11 +125,23 @@ def compute_cascade_features(features: pd.DataFrame, A_geo, commodity_graphs, fi
     shock_col = "county_shock" if "county_shock" in features.columns else "price_change_1m"
     logger.info(f"Shock column: {shock_col}")
 
+    # Diffuse economic + biophysical features through the graph
+    # Economic → commodity graph (supply chain); Biophysical → geo graph (weather spreads)
+    ECON_DIFFUSE = ["price_change_1m", "price_volatility_3m", "county_shock"]
+    ECON_DIFFUSE = [c for c in ECON_DIFFUSE if c in features.columns]
+    BIO_DIFFUSE = ["pdsi", "tmax", "precip", "yield_value", "nass_waste_proxy"]
+    BIO_DIFFUSE = [c for c in BIO_DIFFUSE if c in features.columns]
+    EXTRA_DIFFUSE = ECON_DIFFUSE + BIO_DIFFUSE
+    logger.info(f"Econ diffusion (commodity graph): {ECON_DIFFUSE}")
+    logger.info(f"Bio diffusion (geo graph): {BIO_DIFFUSE}")
+
     # Pre-allocate output arrays
     col_names = []
     for k in range(1, N_HOPS + 1):
         col_names.extend([f"neg_{k}hop", f"pos_{k}hop"])
     col_names.extend(["decay_neg_2", "decay_neg_3", "decay_pos_2", "decay_pos_3"])
+    for ec in EXTRA_DIFFUSE:
+        col_names.append(f"nbr_{ec}_1hop")
 
     out = {c: np.zeros(len(features), dtype=np.float32) for c in col_names}
 
@@ -192,6 +204,22 @@ def compute_cascade_features(features: pd.DataFrame, A_geo, commodity_graphs, fi
             out["decay_neg_3"][idx[j]] = (n3 / n2) if n2 > DECAY_THRESH else 0.0
             out["decay_pos_2"][idx[j]] = (p2 / p1) if p1 > DECAY_THRESH else 0.0
             out["decay_pos_3"][idx[j]] = (p3 / p2) if p2 > DECAY_THRESH else 0.0
+
+        # === EXTRA: neighborhood-averaged features ===
+        # Economic features → commodity graph (supply chain)
+        # Biophysical features → geo graph (weather spreads geographically)
+        for ec in EXTRA_DIFFUSE:
+            ec_vals = group[ec].fillna(0).values.astype(np.float32)
+            ec_vec = np.zeros(N, dtype=np.float32)
+            for j in range(len(node_ids)):
+                if node_ids[j] >= 0:
+                    ec_vec[node_ids[j]] = ec_vals[j]
+            A_use = A_geo if ec in BIO_DIFFUSE else A_comm
+            nbr = A_use @ ec_vec  # 1-hop neighborhood average
+            col = f"nbr_{ec}_1hop"
+            for j in range(len(node_ids)):
+                if node_ids[j] >= 0:
+                    out[col][idx[j]] = nbr[node_ids[j]]
 
     features.drop(columns=["_node_idx"], inplace=True)
     for c in col_names:

@@ -120,11 +120,26 @@ class _LocalEcon(nn.Module):
                 "disentangle_loss": torch.tensor(0.0, device=h.device)}
 
 
+class _CascadeDirect(nn.Module):
+    """R3: bio + hist + cascade features (skip raw econ — graph-diffused is cleaner)."""
+    def __init__(self, bio_dim, hist_dim, cascade_dim, **kw):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(bio_dim + hist_dim + cascade_dim, 128), nn.BatchNorm1d(128),
+            nn.ReLU(), nn.Dropout(0.3), nn.Linear(128, 64), nn.ReLU(), nn.Dropout(0.3))
+        self.waste = nn.Linear(64, 1); self.cause = nn.Linear(64, 6)
+
+    def forward(self, batch):
+        h = self.net(torch.cat([batch["x_bio"], batch["x_hist"], batch["x_cascade"]], dim=-1))
+        return {"waste_logits": self.waste(h), "cause_logits": self.cause(h),
+                "disentangle_loss": torch.tensor(0.0, device=h.device)}
+
+
 class _SymmetricDiff(nn.Module):
     """R3: symmetric diffusion — collapse pos+neg per hop, single graph."""
     def __init__(self, bio_dim, econ_dim, hist_dim, cascade_dim, **kw):
         super().__init__()
-        n_hops = (cascade_dim - 4) // 2  # 6 raw / 2 = 3 hops (collapse pos+neg)
+        n_hops = 3  # 3 hop distances, 2 channels each (pos+neg) = first 6 features
         self.n_hops = n_hops
         self.net = nn.Sequential(
             nn.Linear(bio_dim + econ_dim + hist_dim + n_hops, 128), nn.BatchNorm1d(128),
@@ -163,10 +178,11 @@ class _PolarityRouted(nn.Module):
 MODEL_REGISTRY = {
     "local_only": "R1",
     "local_econ": "R2",
-    "symmetric_diff": "R3",
-    "polarity_routed": "R4",
-    "prcn": "R5",
-    "temporal_prcn": "R6-Temporal",
+    "cascade_direct": "R3-Cascade",
+    "symmetric_diff": "R4-Symmetric",
+    "polarity_routed": "R5-PolarityRouted",
+    "prcn": "R6-PRCN",
+    "temporal_prcn": "R7-Temporal",
 }
 
 TEMPORAL_WINDOW = 6  # months of lookback
@@ -230,6 +246,8 @@ def create_model(name, bio_dim, econ_dim, hist_dim, cascade_dim):
         return _LocalOnly(bio_dim, hist_dim)
     elif name == "local_econ":
         return _LocalEcon(bio_dim, econ_dim, hist_dim)
+    elif name == "cascade_direct":
+        return _CascadeDirect(bio_dim, hist_dim, cascade_dim)
     elif name == "symmetric_diff":
         return _SymmetricDiff(bio_dim, econ_dim, hist_dim, cascade_dim)
     elif name == "polarity_routed":
