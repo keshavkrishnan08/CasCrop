@@ -180,8 +180,8 @@ class PRCN(nn.Module):
         x_routed = x_cascade * channel_weights              # element-wise gating
         z_cascade = self.cascade_enc(x_routed)               # (B, latent_dim)
 
-        # Novel: cascade persistence score from decay signatures
-        decay_features = x_cascade[:, 6:]  # last 4 features are decay ratios
+        # Novel: cascade persistence score from decay signatures (indices 6-9)
+        decay_features = x_cascade[:, 6:10]  # 4 decay ratio features
         persistence = self.persistence_head(decay_features)  # (B, 1)
 
         # Concatenate and predict
@@ -279,10 +279,7 @@ class TemporalPRCN(nn.Module):
 
         # Persistence from last month's decay features
         n_decay = 4  # last 4 cascade features are decay signatures
-        decay_feats = x_cascade[:, -1, -(n_decay + 2):-2]  # decay columns
-        # Fallback: use last 4 of last month's cascade
-        if decay_feats.shape[-1] != 4:
-            decay_feats = x_cascade[:, -1, -4:]
+        decay_feats = x_cascade[:, -1, 6:10]  # decay ratio features (indices 6-9)
         persistence = self.persistence_head(decay_feats)
 
         h_full = torch.cat([h, x_hist, persistence], dim=-1)
