@@ -61,28 +61,60 @@ def sparsify_top_k(A: sp.spmatrix, k: int = 20) -> sp.spmatrix:
     return sp.csr_matrix(result)
 
 
-def load_graphs(fips_to_idx: dict):
-    """Load geo graph + per-commodity graphs (sparsified + normalized)."""
+def load_graphs(fips_to_idx: dict, features_df=None):
+    """Load/build graphs for polarity routing.
+
+    Uses pre-built commodity adjacency files if available.
+    Otherwise, builds commodity subgraphs from combined_graph by filtering
+    to counties that grow each commodity — works on any platform without
+    extra downloads.
+    """
+    import pandas as pd
     N = len(fips_to_idx)
 
-    # Geographic graph (already sparse)
-    A_geo = sp.load_npz(GRAPH / "adjacency_geo.npz")
-    A_geo_norm = row_normalize(A_geo)
-    logger.info(f"Geo graph: {A_geo.nnz:,} edges")
+    # Load combined graph (always available from data release)
+    graph = np.load(GRAPH / "combined_graph.npz")
+    edge_index = graph["edge_index"]
+    edge_weight = graph.get("edge_weight", np.ones(edge_index.shape[1]))
+    A_combined = sp.coo_matrix(
+        (edge_weight, (edge_index[0], edge_index[1])), shape=(N, N)
+    ).tocsr()
+    A_combined_norm = row_normalize(A_combined)
+    logger.info(f"Combined graph: {A_combined.nnz:,} edges")
 
-    # Per-commodity graphs (dense → sparsify → normalize)
+    # Geographic graph: use pre-built if available, else use combined
+    geo_path = GRAPH / "adjacency_geo.npz"
+    if geo_path.exists():
+        A_geo_norm = row_normalize(sp.load_npz(geo_path))
+        logger.info(f"Geo graph (file): {A_geo_norm.nnz:,} edges")
+    else:
+        A_geo_norm = A_combined_norm
+        logger.info(f"Geo graph (fallback to combined): {A_geo_norm.nnz:,} edges")
+
+    # Per-commodity graphs
     commodity_graphs = {}
     for commodity, fname in COMMODITY_GRAPH_MAP.items():
         path = GRAPH / fname
         if path.exists():
             A_raw = sp.load_npz(path)
             A_sparse = sparsify_top_k(A_raw, TOP_K)
-            A_norm = row_normalize(A_sparse)
-            commodity_graphs[commodity] = A_norm
-            logger.info(f"{commodity} graph: {A_raw.nnz:,} → {A_sparse.nnz:,} edges (top-{TOP_K})")
+            commodity_graphs[commodity] = row_normalize(A_sparse)
+            logger.info(f"{commodity} graph (file): {A_raw.nnz:,} -> {A_sparse.nnz:,} edges")
+        elif features_df is not None:
+            # Build from combined graph: keep edges where BOTH counties grow this commodity
+            comm_fips = set(features_df[features_df["commodity"] == commodity]["fips"].unique())
+            comm_idx = set(fips_to_idx[f] for f in comm_fips if f in fips_to_idx)
+            coo = A_combined.tocoo()
+            mask = np.array([(int(r) in comm_idx and int(c) in comm_idx)
+                             for r, c in zip(coo.row, coo.col)])
+            A_comm = sp.coo_matrix((coo.data[mask], (coo.row[mask], coo.col[mask])),
+                                   shape=(N, N)).tocsr()
+            commodity_graphs[commodity] = row_normalize(A_comm)
+            logger.info(f"{commodity} graph (built): {A_comm.nnz:,} edges "
+                        f"({len(comm_idx)} counties)")
         else:
-            logger.warning(f"Missing: {path}")
-            commodity_graphs[commodity] = A_geo_norm  # fallback
+            commodity_graphs[commodity] = A_combined_norm
+            logger.warning(f"{commodity} graph: fallback to combined")
 
     return A_geo_norm, commodity_graphs
 
@@ -177,7 +209,7 @@ def main():
         fips_to_idx = json.load(f)
 
     logger.info("Loading graphs (polarity routing: commodity + geo)...")
-    A_geo, commodity_graphs = load_graphs(fips_to_idx)
+    A_geo, commodity_graphs = load_graphs(fips_to_idx, features)
 
     logger.info("Computing polarity-routed cascade features...")
     enriched, cascade_cols = compute_cascade_features(
