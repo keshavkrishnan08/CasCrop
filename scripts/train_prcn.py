@@ -350,7 +350,7 @@ def train_model(name, seed, train_loader, val_loader, test_loader,
     torch.save({"model_state_dict": best_state or model.state_dict(),
                 "model_name": name, "seed": seed, "n_params": n_params,
                 "best_val_auc": best_auc, "best_epoch": best_epoch,
-                "test_metrics": test}, CKPT / f"prcn_{name}_seed{seed}.pt")
+                "test_metrics": test}, CKPT / f"prcn_{name}{args.output_suffix}_seed{seed}.pt")
     del model
     if torch.cuda.is_available(): torch.cuda.empty_cache()
 
@@ -371,6 +371,10 @@ def main():
     parser.add_argument("--patience", type=int, default=20)
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--random-split", action="store_true",
+                        help="Use 70/15/15 random split instead of temporal split")
+    parser.add_argument("--output-suffix", type=str, default="",
+                        help="Suffix for output files (e.g. '_random')")
     args = parser.parse_args()
 
     device = f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu"
@@ -384,6 +388,20 @@ def main():
     logger.info(f"Data: {len(features):,} | bio={bio_dim} econ={econ_dim} hist={hist_dim} cascade={cascade_dim}")
 
     x_bio, x_econ, x_hist, x_cascade, y_waste, y_cause = build_tensors(features, labels, stats, groups)
+
+    # Override splits if random split requested
+    if args.random_split:
+        logger.info("Using RANDOM 70/15/15 split (not temporal)")
+        N = len(features)
+        perm = np.random.RandomState(42).permutation(N)
+        n_train = int(0.7 * N)
+        n_val = int(0.15 * N)
+        splits = {
+            "train": perm[:n_train].tolist(),
+            "val": perm[n_train:n_train + n_val].tolist(),
+            "test": perm[n_train + n_val:].tolist(),
+        }
+        logger.info(f"Random split: train={n_train:,} val={n_val:,} test={N-n_train-n_val:,}")
 
     # Standard loaders (snapshot models)
     def make_loader(indices, shuffle=False):
@@ -455,12 +473,12 @@ def main():
                     "best_val_auc": 0, "best_epoch": 0})
 
             RESULTS.mkdir(parents=True, exist_ok=True)
-            with open(RESULTS / "prcn_results.json", "w") as f:
+            with open(RESULTS / f"prcn_results{args.output_suffix}.json", "w") as f:
                 json.dump(all_results, f, indent=2, default=str)
 
     import pandas as pd
     df = pd.DataFrame(all_results)
-    df.to_csv(RESULTS / "prcn_results.csv", index=False)
+    df.to_csv(RESULTS / f"prcn_results{args.output_suffix}.csv", index=False)
     logger.info(f"\n{'='*60}\nFINAL RESULTS\n{'='*60}")
     for m in models:
         d = df[(df["model"]==m) & (df["test_auc_roc"]>0)]
