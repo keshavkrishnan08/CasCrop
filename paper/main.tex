@@ -548,7 +548,7 @@ Figure~\ref{fig:split_comparison} visualizes this reversal directly.
 
 \paragraph{Non-stationarity of economic contagion.} Graph-derived features learned from 2015--2019 data partially transfer to 2022--2024 (the polarity-routed model still achieves 0.892 AUC-ROC, well above chance) but transfer less effectively than biophysical features. This makes economic sense: trade routes shift, new processing facilities open, commodity markets restructure between periods.
 
-\paragraph{Biophysical features transfer better.} The local-only model drops just 0.7 points from random split (0.917) to temporal split (0.910). NDVI still predicts drought stress in 2023 the same way it did in 2017. The physics hasn't changed. Economic geography, however, can shift substantially over a five-year gap.
+\paragraph{Biophysical features transfer better.} The local-only model drops just 0.7 points from random split (0.917) to temporal split (0.910). PDSI still predicts drought stress in 2023 the same way it did in 2017. The physics hasn't changed. Economic geography, however, can shift substantially over a five-year gap.
 
 \paragraph{Raw economic features hurt under temporal shift.} Adding economic features (local\_econ, 0.888) actually degrades performance relative to local-only (0.910). The model overfits to statistical relationships between prices and waste that are specific to the 2015--2019 period.
 
