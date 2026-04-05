@@ -306,7 +306,8 @@ def evaluate(model, loader, device):
 
 
 def train_model(name, seed, train_loader, val_loader, test_loader,
-                bio_dim, econ_dim, hist_dim, cascade_dim, epochs, patience, lr, device):
+                bio_dim, econ_dim, hist_dim, cascade_dim, epochs, patience, lr, device,
+                output_suffix=""):
     torch.manual_seed(seed); np.random.seed(seed)
     model = create_model(name, bio_dim, econ_dim, hist_dim, cascade_dim).to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -350,7 +351,7 @@ def train_model(name, seed, train_loader, val_loader, test_loader,
     torch.save({"model_state_dict": best_state or model.state_dict(),
                 "model_name": name, "seed": seed, "n_params": n_params,
                 "best_val_auc": best_auc, "best_epoch": best_epoch,
-                "test_metrics": test}, CKPT / f"prcn_{name}{args.output_suffix}_seed{seed}.pt")
+                "test_metrics": test}, CKPT / f"prcn_{name}{output_suffix}_seed{seed}.pt")
     del model
     if torch.cuda.is_available(): torch.cuda.empty_cache()
 
@@ -463,7 +464,8 @@ def main():
             try:
                 r = train_model(model_name, seed, train_loader, val_loader, test_loader,
                                 bio_dim, econ_dim, hist_dim, cascade_dim,
-                                args.epochs, args.patience, args.lr, device)
+                                args.epochs, args.patience, args.lr, device,
+                                args.output_suffix)
                 all_results.append(r)
             except Exception as e:
                 logger.error(f"FAILED: {model_name} seed={seed}: {e}")
