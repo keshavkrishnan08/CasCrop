@@ -70,7 +70,7 @@ crop waste prediction \sep graph diffusion \sep economic contagion \sep polarity
 % =============================================================================
 \begin{figure}[t]
     \centering
-    \IfFileExists{figures/fig0_graphical_abstract.pdf}{\includegraphics[width=\textwidth]{figures/fig0_graphical_abstract}}{{\Large\textbf{[Graphical Abstract — generating...]}}}
+    \includegraphics[width=\textwidth]{figures/fig0_graphical_abstract}
     \caption*{\textbf{Graphical Abstract.} Crop waste cascades through agricultural economic networks. Negative price shocks propagate along commodity-specific supply chains, while positive signals follow geographic proximity. Routing these signals through different graph topologies---polarity-routed cascade diffusion---improves crop waste prediction to 0.935 AUC-ROC on 638,622 USDA records across 2,130 U.S.\ counties.}
 \end{figure}
 
@@ -361,7 +361,7 @@ This is the central methodological contribution. Figure~\ref{fig:architecture} i
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=\textwidth]{figures/fig1_architecture}% will switch to fig1_architecture_v2 when available
+    \includegraphics[width=\textwidth]{figures/fig1_architecture_v2}
     \caption{Polarity-routed cascade diffusion pipeline. Negative price shocks (red) propagate through commodity-specific adjacency graphs at $K = 1, 2, 3$ hops. Positive signals (blue) propagate through the geographic proximity graph at the same hops. Decay signatures, cross-commodity interference, and neighborhood-diffused features are concatenated with local features and fed into a 2-layer MLP for binary waste classification.}
     \label{fig:architecture}
 \end{figure}
