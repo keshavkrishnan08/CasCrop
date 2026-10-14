@@ -106,7 +106,7 @@ docker build -t cascrop . && docker run --gpus all cascrop
 ## Patent
 
 A provisional patent application for polarity-routed cascade diffusion in crop waste forecasting
-is in `patent/`, with the claims, the prior-art search, and the commit record that documents the
+is in `patent/`, with the claims, the prior-art search, and a dated change log that documents the
 invention.
 
 ## Layout
