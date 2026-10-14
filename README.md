@@ -4,7 +4,7 @@ A graph neural network approach to predicting agricultural loss cascades.
 
 ## The Problem
 
-Billions of dollars in US crops go to waste annually — not from drought or frost, but from economic forces. When a bumper harvest in Iowa crashes corn prices, farmers in Indiana may abandon perfectly healthy crops because harvesting costs more than the depressed market price. This economic contagion propagates across regions like a financial crisis spreads through banks.
+Billions of dollars in US crops go to waste annually - not from drought or frost, but from economic forces. When a bumper harvest in Iowa crashes corn prices, farmers in Indiana may abandon perfectly healthy crops because harvesting costs more than the depressed market price. This economic contagion propagates across regions like a financial crisis spreads through banks.
 
 Every existing crop prediction model treats each county independently. None capture these inter-regional economic dependencies. CasCrop fills that gap.
 
