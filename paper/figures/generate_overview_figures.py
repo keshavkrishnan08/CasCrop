@@ -184,7 +184,7 @@ def make_graphical_abstract():
     ax_l.text(0.5, 0.48, "$19B in annual crop waste", ha="center", va="top",
               fontsize=9, fontweight="bold", color="#1a1a2e")
     ax_l.text(0.5, 0.40,
-              "Counties aren't independent, \nshocks cascade across networks",
+              "Counties aren't independent,\nshocks cascade across networks",
               ha="center", va="top", fontsize=8, color=GRAY,
               multialignment="center")
 

@@ -273,7 +273,7 @@ class CaseStudyAnalyzer:
             f"(NDVI = {event.get('target_ndvi', 'N/A')}). "
             f"By {peak_waste['year']}/{peak_waste['month']:02d}, "
             f"the model predicted a {peak_waste['waste_probability']:.0%} "
-            f"waste probability for the target county,"
+            f"waste probability for the target county, "
             f"{event['lag_months']} months before the loss occurred. "
             f"A local-only model, lacking inter-regional economic signals, "
             f"would have missed this cascade entirely."
