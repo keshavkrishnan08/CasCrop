@@ -1,4 +1,4 @@
-# Row 3: Geographic GAT — standard GAT on geographic adjacency only
+# Row 3: Geographic GAT: standard GAT on geographic adjacency only
 # No economic conditioning on attention
 _base_: default.yaml
 

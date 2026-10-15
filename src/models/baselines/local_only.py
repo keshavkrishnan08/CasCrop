@@ -101,5 +101,5 @@ class LocalOnlyModel(nn.Module):
 
     @torch.no_grad()
     def get_attention_weights(self, batch: Dict[str, Any]) -> None:
-        """No graph — returns None."""
+        """No graph, returns None."""
         return None

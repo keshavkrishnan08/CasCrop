@@ -1,7 +1,7 @@
 """Row 3 baseline: standard GAT on geographic adjacency.
 
 Uses the same encoders and heads as CasCrop but swaps the ECMP graph
-layers for vanilla GAT.  No price-shock conditioning — tests whether
+layers for vanilla GAT.  No price-shock conditioning, tests whether
 plain neighbourhood aggregation already captures spatial contagion.
 """
 

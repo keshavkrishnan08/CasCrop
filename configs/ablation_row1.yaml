@@ -1,4 +1,4 @@
-# Row 1: Local Only — biophysical features, no graph, no economic features
+# Row 1: Local Only: biophysical features, no graph, no economic features
 # Represents current state of the art for crop prediction
 _base_: default.yaml
 

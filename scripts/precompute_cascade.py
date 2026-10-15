@@ -66,7 +66,7 @@ def load_graphs(fips_to_idx: dict, features_df=None):
 
     Uses pre-built commodity adjacency files if available.
     Otherwise, builds commodity subgraphs from combined_graph by filtering
-    to counties that grow each commodity — works on any platform without
+    to counties that grow each commodity, works on any platform without
     extra downloads.
     """
     import pandas as pd
@@ -192,7 +192,7 @@ def compute_cascade_features(features: pd.DataFrame, A_geo, commodity_graphs, fi
                     out[f"pos_{k}hop"][idx[j]] = h_pos[node_ids[j]]
 
         # === CASCADE DECAY SIGNATURES ===
-        # Ratio of consecutive hops — only meaningful when denominator > threshold
+        # Ratio of consecutive hops: only meaningful when denominator > threshold
         DECAY_THRESH = 1e-4
         for j in range(len(node_ids)):
             nid = node_ids[j]

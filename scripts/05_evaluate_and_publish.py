@@ -102,7 +102,7 @@ def main():
                 f"{'***' if t['p_value'] < 0.001 else '**' if t['p_value'] < 0.01 else '*' if t['p_value'] < 0.05 else 'n.s.'}"
             )
     else:
-        logger.info("  (Need ≥2 seeds for paired tests — using single-seed results)")
+        logger.info("  (Need ≥2 seeds for paired tests, using single-seed results)")
 
     # ── LaTeX Table ──────────────────────────────────────────────────
     logger.info("\n=== GENERATING LATEX TABLE ===")

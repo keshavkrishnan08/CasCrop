@@ -1,5 +1,5 @@
 """
-graph_builder.py — Build dynamic county graphs for ECMP.
+graph_builder.py, Build dynamic county graphs for ECMP.
 
 Constructs three adjacency layers (geographic, commodity-market,
 transport) and fuses them into a single time-varying graph where
@@ -50,10 +50,10 @@ class GraphBuilder:
     """Build and manage the multi-layer dynamic county graph.
 
     Three adjacency layers:
-    1. Geographic — distance-weighted or binary contiguity
-    2. Commodity — per-crop market connectivity (production similarity,
+    1. Geographic, distance-weighted or binary contiguity
+    2. Commodity, per-crop market connectivity (production similarity,
        price correlation)
-    3. Transport — road/rail distance proxy, grain elevator proximity
+    3. Transport, road/rail distance proxy, grain elevator proximity
 
     These get fused via learnable coefficients (alpha, beta, gamma)
     into a single edge-weighted graph per time step.

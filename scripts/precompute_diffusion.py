@@ -5,7 +5,7 @@ For each county-commodity-month sample, computes how price shocks
 propagate through the agricultural network at 1, 2, and 3 hops,
 split into positive and negative channels.
 
-This replaces online GNN message passing with pre-computed graph features —
+This replaces online GNN message passing with pre-computed graph features,
 no mini-batch subgraph construction needed at training time.
 
 Output: data/processed/features_diffusion.parquet

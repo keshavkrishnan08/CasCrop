@@ -15,7 +15,7 @@ from ..heads.cause_classifier import CauseClassifier
 
 
 class TemporalLocalModel(nn.Module):
-    """GRU on local features only — no graph, no economic features.
+    """GRU on local features only, no graph, no economic features.
 
     Temporal baseline: shows the value of graph contagion modeling
     beyond just having temporal information.

@@ -1,5 +1,5 @@
 """
-dataset.py — PyTorch Dataset and DataLoader for CasCrop.
+dataset.py, PyTorch Dataset and DataLoader for CasCrop.
 
 Provides ``CasCropDataset`` (a standard ``torch.utils.data.Dataset``)
 and ``CasCropGraphBatch`` (a collation helper that groups samples by
@@ -171,7 +171,7 @@ class CasCropDataset(Dataset):
             dtype=torch.long,
         )
 
-        # Price shock (1-month price change) — used by ECMP
+        # Price shock (1-month price change): used by ECMP
         if "price_change_1m" in self.features.columns:
             self._price_shock = torch.tensor(
                 self.features["price_change_1m"]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Train Cascade Diffusion models on pre-computed diffusion features.
 
-No online GNN — graph information is baked into diffusion features.
+No online GNN, graph information is baked into diffusion features.
 Standard mini-batch training, fast and reliable on any hardware.
 
 Usage:

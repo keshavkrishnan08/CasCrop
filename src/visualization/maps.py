@@ -52,7 +52,7 @@ def figure_5_cascade_map(
     time_labels: list[str],
     output_path: str = "paper/figures/fig5_cascade_map.pdf",
 ):
-    """Figure 5: Case study cascade map — 4-6 panel temporal progression.
+    """Figure 5: Case study cascade map, 4-6 panel temporal progression.
 
     Each panel shows a time step with:
     - Counties colored by waste probability (heatmap)

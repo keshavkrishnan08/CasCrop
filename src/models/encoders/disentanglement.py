@@ -109,7 +109,7 @@ class DisentanglementModule(nn.Module):
             disentangle_loss: scalar MSE between D(GRL(z_bio)) and z_econ.
         """
         # z_bio shape: (B, latent_dim)
-        z_bio_rev = self.grl(z_bio)                   # (B, latent_dim)  — gradient reversed
+        z_bio_rev = self.grl(z_bio)                   # (B, latent_dim): gradient reversed
         z_econ_pred = self.discriminator(z_bio_rev)    # (B, latent_dim)
         loss = torch.nn.functional.mse_loss(z_econ_pred, z_econ.detach())
         return loss  # scalar

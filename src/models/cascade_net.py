@@ -33,7 +33,7 @@ import torch.nn.functional as F
 class ExposureAttention(nn.Module):
     """Learn which diffusion channels (hop × polarity) matter.
 
-    Input:  (B, 2K) — K hops × {pos, neg}
+    Input:  (B, 2K), K hops × {pos, neg}
     Output: (B, latent_dim), (B, 2K) attention weights
 
     Each channel is embedded independently, then soft-attention
@@ -232,7 +232,7 @@ class CascadeNet(nn.Module):
 class TemporalCascadeNet(nn.Module):
     """Temporal version: GRU over monthly sequences of cascade features.
 
-    Captures contagion momentum — sustained multi-hop exposure compounds
+    Captures contagion momentum, sustained multi-hop exposure compounds
     risk over time. A county receiving persistent negative diffusion
     signals over 3+ months develops amplified risk.
 
@@ -280,7 +280,7 @@ class TemporalCascadeNet(nn.Module):
         # batch contains sequences: x_bio (B,T,D), x_econ (B,T,D), etc.
         x_bio_seq = batch["x_bio"]      # (B, T, bio_dim)
         x_econ_seq = batch["x_econ"]    # (B, T, econ_dim)
-        x_hist = batch["x_hist"]        # (B, hist_dim) — static
+        x_hist = batch["x_hist"]        # (B, hist_dim): static
         x_diff_seq = batch["x_diff"]    # (B, T, diff_dim)
 
         B, T, _ = x_bio_seq.shape

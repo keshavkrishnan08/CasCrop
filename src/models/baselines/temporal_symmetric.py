@@ -50,7 +50,7 @@ class TemporalSymmetricModel(nn.Module):
         )
         node_dim = latent_dim + latent_dim + hist_dim
 
-        # SYMMETRIC ECMP — single W_sym instead of W_pos/W_neg
+        # SYMMETRIC ECMP: single W_sym instead of W_pos/W_neg
         self.ecmp = ECMPLayer(
             in_dim=node_dim, out_dim=hidden_dim, num_heads=num_heads,
             dropout=dropout, shock_embed_dim=shock_embed_dim,

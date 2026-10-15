@@ -79,7 +79,7 @@ def table_2_ablation_results(
     p_values: dict = None,
     output_path: str = "paper/tables/table2_ablation.tex",
 ):
-    """Table 2: Main ablation results — THE central table.
+    """Table 2: Main ablation results, THE central table.
 
     5 ablation rows + 3 additional baselines.
     Columns: AUC-ROC, AUC-PR, F1, Precision, Recall.

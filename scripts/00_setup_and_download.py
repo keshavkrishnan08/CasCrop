@@ -130,7 +130,7 @@ def unzip_file(zip_path: Path, extract_to: Path) -> list:
 def download_rma_data(raw_dir: Path) -> dict:
     """Download USDA RMA Cause of Loss data (no API key needed).
 
-    These are the training labels — the most critical dataset.
+    These are the training labels, the most critical dataset.
     """
     rma_dir = raw_dir / "rma"
     rma_dir.mkdir(parents=True, exist_ok=True)
@@ -277,7 +277,7 @@ def download_drought_data(raw_dir: Path) -> dict:
         if outfile.exists() and outfile.stat().st_size > 100:
             result["files"].append(str(outfile))
             continue
-        # This URL may not work directly — log it
+        # This URL may not work directly: log it
         download_file(url, outfile, f"Drought data {year}", max_retries=1)
         if outfile.exists() and outfile.stat().st_size > 100:
             result["files"].append(str(outfile))
@@ -294,7 +294,7 @@ def download_nass_data(raw_dir: Path, api_key: str) -> dict:
 
     if not api_key:
         result["status"] = "skipped"
-        result["reason"] = "No NASS_API_KEY in .env — get one at https://quickstats.nass.usda.gov/api"
+        result["reason"] = "No NASS_API_KEY in .env, get one at https://quickstats.nass.usda.gov/api"
         return result
 
     import requests

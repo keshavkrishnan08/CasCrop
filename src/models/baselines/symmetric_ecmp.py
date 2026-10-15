@@ -26,7 +26,7 @@ class SymmetricECMPModel(nn.Module):
     The only architectural difference from CasCrop:
         ECMPStack(..., asymmetric=False)
 
-    This means phi(delta_p) = W_sym * delta_p — a single linear transform
+    This means phi(delta_p) = W_sym * delta_p, a single linear transform
     rather than the split positive/negative pathways.
     """
 

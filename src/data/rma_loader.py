@@ -117,7 +117,7 @@ KEEP_COLS = [
 class RMALoader:
     """Download, parse, clean, and validate USDA RMA cause-of-loss data."""
 
-    # URL patterns — RMA changes these occasionally, so we try several
+    # URL patterns: RMA changes these occasionally, so we try several
     _URL_PATTERNS = [
         "https://www.rma.usda.gov/-/media/RMA/Cause-of-Loss/ColData{year}.ashx",
         "https://www.rma.usda.gov/-/media/RMA/Cause-of-Loss/coldat{year}.zip",
@@ -165,7 +165,7 @@ class RMALoader:
                         success = True
                         break
                 except Exception as exc:
-                    logger.debug("URL failed: %s — %s", url, exc)
+                    logger.debug("URL failed: %s, %s", url, exc)
 
             if not success:
                 logger.warning("Could not download RMA data for year %d", year)
@@ -224,7 +224,7 @@ class RMALoader:
         else:
             raw_text = path.read_text(encoding="latin-1", errors="replace")
 
-        # Detect delimiter — RMA uses pipe (|) in most years
+        # Detect delimiter: RMA uses pipe (|) in most years
         first_line = raw_text.split("\n")[0]
         if "|" in first_line:
             sep = "|"
@@ -383,7 +383,7 @@ class RMALoader:
         # State coverage
         states_present = df["fips"].str[:2].nunique()
         assert states_present >= 40, (
-            f"Only {states_present} states present — expected >= 40. "
+            f"Only {states_present} states present, expected >= 40. "
             f"Missing: {set(STATE_FIPS_TO_NAME.keys()) - set(df['fips'].str[:2].unique())}"
         )
         logger.info("State coverage: %d states", states_present)

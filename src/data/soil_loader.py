@@ -119,7 +119,7 @@ class SMAPLoader:
         saved = []
 
         if ee is None:
-            logger.info("GEE unavailable — trying Crop-CASMA download")
+            logger.info("GEE unavailable, trying Crop-CASMA download")
             return self._download_crop_casma(years, output_dir)
 
         fips_df = load_fips_codes()
@@ -339,7 +339,7 @@ class SMAPLoader:
 
         df = pd.concat(frames, ignore_index=True)
 
-        # Aggregate — might have multiple records per county-month from
+        # Aggregate: might have multiple records per county-month from
         # different SMAP passes
         sm_cols = [c for c in df.columns if c.startswith("sm_")]
         agg_dict = {c: "mean" for c in sm_cols}

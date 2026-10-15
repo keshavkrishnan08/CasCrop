@@ -17,7 +17,7 @@ Architecture:
 
 The GRU hidden state accumulates contagion signals over time. A county
 that receives persistent negative shock signals from neighbors over
-June-July-August develops an amplified risk state by September — the
+June-July-August develops an amplified risk state by September, the
 model learns "contagion momentum."
 
 Novel mechanisms (all patentable):
@@ -102,7 +102,7 @@ class TemporalECMPCell(nn.Module):
 
 
 class TemporalCasCrop(nn.Module):
-    """Temporal Cascade CasCrop — the full architecture.
+    """Temporal Cascade CasCrop, the full architecture.
 
     Processes a sequence of T monthly observations. At each month,
     runs shock-conditioned graph message passing and updates a
@@ -155,7 +155,7 @@ class TemporalCasCrop(nn.Module):
         # Node feature dimension after encoding
         node_dim = latent_dim + latent_dim + hist_dim  # z_bio + z_econ + z_hist
 
-        # Temporal cascade cell (shared across time steps — weight tying)
+        # Temporal cascade cell (shared across time steps: weight tying)
         self.cascade_cell = TemporalECMPCell(
             node_dim=node_dim,
             hidden_dim=hidden_dim,
@@ -226,14 +226,14 @@ class TemporalCasCrop(nn.Module):
         }
 
     def _forward_temporal(self, batch: Dict[str, Any]) -> Dict[str, torch.Tensor]:
-        """Temporal sequence forward pass — the core novel computation.
+        """Temporal sequence forward pass, the core novel computation.
 
         Processes T months sequentially, accumulating contagion state.
         """
         x_bio_seq = batch["x_bio_seq"]      # (T, N, bio_dim)
         x_econ_seq = batch["x_econ_seq"]     # (T, N, econ_dim)
-        x_hist = batch["x_hist"]             # (N, hist_dim) — static
-        edge_index = batch["edge_index"]     # (2, E) — could be time-varying
+        x_hist = batch["x_hist"]             # (N, hist_dim): static
+        edge_index = batch["edge_index"]     # (2, E): could be time-varying
         edge_attr = batch.get("edge_attr")
         shocks_seq = batch["price_shocks_seq"]  # (T, N, 1)
 

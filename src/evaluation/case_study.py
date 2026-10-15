@@ -23,14 +23,14 @@ CANDIDATE_EVENTS = {
         "expected_crops": ["CORN", "SOYBEANS"],
     },
     "2012_drought": {
-        "description": "Widespread drought — contrast between affected and unaffected regions",
+        "description": "Widespread drought, contrast between affected and unaffected regions",
         "source_states": ["IN", "IL", "IA", "MO"],
         "year": 2012,
         "months": [6, 7, 8, 9],
         "expected_crops": ["CORN", "SOYBEANS"],
     },
     "2020_derecho": {
-        "description": "Iowa derecho — localized destruction with price ripple",
+        "description": "Iowa derecho, localized destruction with price ripple",
         "source_states": ["IA"],
         "year": 2020,
         "months": [8, 9, 10],
@@ -273,7 +273,7 @@ class CaseStudyAnalyzer:
             f"(NDVI = {event.get('target_ndvi', 'N/A')}). "
             f"By {peak_waste['year']}/{peak_waste['month']:02d}, "
             f"the model predicted a {peak_waste['waste_probability']:.0%} "
-            f"waste probability for the target county — "
+            f"waste probability for the target county,"
             f"{event['lag_months']} months before the loss occurred. "
             f"A local-only model, lacking inter-regional economic signals, "
             f"would have missed this cascade entirely."

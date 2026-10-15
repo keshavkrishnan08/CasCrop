@@ -1,4 +1,4 @@
-# Row 2: Local + Economic — biophysical + economic features, no graph
+# Row 2: Local + Economic: biophysical + economic features, no graph
 _base_: default.yaml
 
 model:

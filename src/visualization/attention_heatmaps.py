@@ -1,4 +1,4 @@
-"""Attention weight visualization — heatmaps and distributions.
+"""Attention weight visualization, heatmaps and distributions.
 
 Generates Figure S4 (attention weight distributions) and
 supporting attention visualizations for case studies.

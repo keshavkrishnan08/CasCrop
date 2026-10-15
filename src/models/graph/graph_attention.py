@@ -1,4 +1,4 @@
-"""Standard Graph Attention Network layer — baseline without price-shock conditioning.
+"""Standard Graph Attention Network layer, baseline without price-shock conditioning.
 
 Used for Row 3 ablation (GeoGATModel) to isolate the contribution of ECMP's
 asymmetric shock embedding.
@@ -22,7 +22,7 @@ class StandardGATLayer(nn.Module):
 
     alpha_ij = softmax_j( LeakyReLU( a^T [Wh_i || Wh_j] ) )
 
-    No price-shock conditioning — purely structural attention.
+    No price-shock conditioning, purely structural attention.
 
     Args:
         in_dim:       input node feature dimension.

@@ -1,4 +1,4 @@
-# Row 5: Full CasCrop — asymmetric ECMP + disentanglement
+# Row 5: Full CasCrop: asymmetric ECMP + disentanglement
 # The complete novel architecture
 _base_: default.yaml
 

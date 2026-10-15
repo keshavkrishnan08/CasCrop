@@ -1,13 +1,13 @@
 """CasCrop model architectures.
 
 Full model:
-    CasCrop — cascading crop-waste prediction with ECMP graph layers.
+    CasCrop, cascading crop-waste prediction with ECMP graph layers.
 
 Baselines (ablation rows):
-    Row 1: LocalOnlyModel      — MLP on biophysical features only
-    Row 2: LocalEconModel      — MLP on bio + econ features, no graph
-    Row 3: GeoGATModel         — standard GAT on geographic adjacency
-    Row 4: SymmetricECMPModel  — ECMP with symmetric shock embedding
+    Row 1: LocalOnlyModel, MLP on biophysical features only
+    Row 2: LocalEconModel, MLP on bio + econ features, no graph
+    Row 3: GeoGATModel, standard GAT on geographic adjacency
+    Row 4: SymmetricECMPModel, ECMP with symmetric shock embedding
 """
 
 from .cascrop import CasCrop

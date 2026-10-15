@@ -180,7 +180,7 @@ class NASSLoader:
                     if output_dir:
                         df.to_parquet(cache_file, index=False)
 
-                    # Respect rate limits — NASS allows ~100 requests/min
+                    # Respect rate limits: NASS allows ~100 requests/min
                     time.sleep(0.7)
 
             if year_frames:
@@ -221,7 +221,7 @@ class NASSLoader:
         result["statistic"] = stat.upper()
         result["year"] = year
 
-        # Value field — NASS uses commas in numbers and (D) for suppressed
+        # Value field: NASS uses commas in numbers and (D) for suppressed
         if "Value" in df.columns:
             val = df["Value"].astype(str).str.replace(",", "", regex=False)
             val = val.str.strip()

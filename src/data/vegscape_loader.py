@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # VegScape API / download endpoints
 VEGSCAPE_BASE_URL = "https://nassgeodata.gmu.edu/VegScape"
 
-# MODIS NDVI product (MOD13Q1) — 250m, 16-day composites
+# MODIS NDVI product (MOD13Q1): 250m, 16-day composites
 # Used as fallback when VegScape API is unavailable
 MODIS_NDVI_COLLECTION = "MODIS/061/MOD13Q1"
 
@@ -114,7 +114,7 @@ class VegScapeLoader:
         """
         records = []
 
-        # VegScape data URLs — try the county statistics endpoint
+        # VegScape data URLs: try the county statistics endpoint
         for week_start_doy in range(1, 366, 16):
             date_str = f"{year}{week_start_doy:03d}"
 
@@ -256,7 +256,7 @@ class VegScapeLoader:
         # This would require an authenticated session with Earthdata.
         # For now, return None and let downstream handle missing data.
         logger.warning(
-            "AppEEARS fallback not fully automated — requires Earthdata "
+            "AppEEARS fallback not fully automated, requires Earthdata "
             "login. Year %d VegScape data will be missing.",
             year,
         )

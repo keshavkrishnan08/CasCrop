@@ -168,7 +168,7 @@ def load_fips_codes(cache_path: Optional[Path] = None) -> pd.DataFrame:
     logger.info("Downloading FIPS codes from Census Bureau gazetteer files")
     session = create_retry_session()
 
-    # Census Bureau county gazetteer — tab-delimited, contains FIPS + lat/lon
+    # Census Bureau county gazetteer: tab-delimited, contains FIPS + lat/lon
     url = (
         "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/"
         "2023_Gazetteer/2023_Gaz_counties_national.zip"
@@ -208,7 +208,7 @@ def load_fips_codes(cache_path: Optional[Path] = None) -> pd.DataFrame:
     result["lat"] = pd.to_numeric(df["INTPTLAT"].str.strip(), errors="coerce")
     result["lon"] = pd.to_numeric(df["INTPTLONG"].str.strip(), errors="coerce")
 
-    # Drop territories — keep only 50 states + DC
+    # Drop territories: keep only 50 states + DC
     result = result[result["state_fips"].isin(STATE_FIPS_TO_NAME.keys())].copy()
     result = result.reset_index(drop=True)
 

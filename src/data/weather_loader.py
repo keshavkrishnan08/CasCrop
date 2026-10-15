@@ -280,7 +280,7 @@ class NOAAWeatherLoader:
                     f"{CDO_API_BASE}{endpoint}", params=params, timeout=60
                 )
                 if resp.status_code == 429:
-                    # Rate limited — back off
+                    # Rate limited: back off
                     logger.warning("Rate limited, sleeping 5 seconds")
                     time.sleep(5)
                     continue
@@ -516,7 +516,7 @@ class NOAAWeatherLoader:
                     year_frames.append(mdf)
 
                 except Exception as exc:
-                    logger.debug("Drought download failed: %s — %s", date_str, exc)
+                    logger.debug("Drought download failed: %s, %s", date_str, exc)
 
                 time.sleep(0.5)
 
@@ -528,7 +528,7 @@ class NOAAWeatherLoader:
                 logger.info("  Year %d: %d drought records", year, len(ydf))
 
         if not frames:
-            logger.warning("No drought data downloaded — will use fallback")
+            logger.warning("No drought data downloaded, will use fallback")
             return pd.DataFrame()
 
         return pd.concat(frames, ignore_index=True)

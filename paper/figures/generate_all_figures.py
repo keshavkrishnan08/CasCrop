@@ -94,7 +94,7 @@ def _load_data():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 1 — Architecture diagram
+# Fig 1: Architecture diagram
 # ══════════════════════════════════════════════════════════════════════════════
 def fig1_architecture():
     print("Generating Fig 1: architecture diagram …")
@@ -196,7 +196,7 @@ def fig1_architecture():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 2 — Study-area map
+# Fig 2: Study-area map
 # ══════════════════════════════════════════════════════════════════════════════
 def fig2_study_area():
     print("Generating Fig 2: study-area map …")
@@ -296,12 +296,12 @@ def fig2_study_area():
     ax_bar.tick_params(left=False)
     ax_bar.set_xlim(0, max(comm_counts.values) * 1.18)
 
-    fig.suptitle("CasCrop Study Area — Continental US (2015–2025)", fontsize=10, fontweight="bold")
+    fig.suptitle("CasCrop Study Area, Continental US (2015-2025)", fontsize=10, fontweight="bold")
     _save(fig, "fig2_study_area.pdf")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 3 — Dataset statistics
+# Fig 3: Dataset statistics
 # ══════════════════════════════════════════════════════════════════════════════
 def fig3_dataset_stats():
     print("Generating Fig 3: dataset statistics …")
@@ -373,7 +373,7 @@ def fig3_dataset_stats():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 4 — Ablation bar chart (random split)
+# Fig 4: Ablation bar chart (random split)
 # ══════════════════════════════════════════════════════════════════════════════
 def fig4_ablation_random():
     print("Generating Fig 4: ablation (random split) …")
@@ -409,7 +409,7 @@ def fig4_ablation_random():
     ax.set_yticks(y_pos)
     ax.set_yticklabels(MODEL_LABELS, fontsize=8)
     ax.set_xlabel("AUC-ROC")
-    ax.set_title("Model Ablation — Random Split", fontsize=10, fontweight="bold")
+    ax.set_title("Model Ablation, Random Split", fontsize=10, fontweight="bold")
     ax.set_xlim(0.88, xmax_val + 0.022)
     ax.xaxis.grid(True, alpha=0.3)
     ax.axvline(AUC_RANDOM[0], color=COL_HIST, linewidth=0.8,
@@ -424,7 +424,7 @@ def fig4_ablation_random():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 5 — Random vs temporal split comparison
+# Fig 5: Random vs temporal split comparison
 # ══════════════════════════════════════════════════════════════════════════════
 def fig5_split_comparison():
     print("Generating Fig 5: random vs temporal split …")
@@ -454,7 +454,7 @@ def fig5_split_comparison():
     ax.set_xticks(x)
     ax.set_xticklabels(MODEL_LABELS, fontsize=8)
     ax.set_ylabel("AUC-ROC")
-    ax.set_title("Random vs Temporal Split — Non-Stationarity Effect",
+    ax.set_title("Random vs Temporal Split, Non-Stationarity Effect",
                  fontsize=10, fontweight="bold")
     ax.set_ylim(0.86, 0.950)
     ax.yaxis.grid(True, alpha=0.3)
@@ -472,7 +472,7 @@ def fig5_split_comparison():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 6 — Cascade feature distributions (KDE)
+# Fig 6: Cascade feature distributions (KDE)
 # ══════════════════════════════════════════════════════════════════════════════
 def fig6_cascade_distributions():
     print("Generating Fig 6: cascade KDE distributions …")
@@ -525,7 +525,7 @@ def fig6_cascade_distributions():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 7 — Decay signatures scatter
+# Fig 7: Decay signatures scatter
 # ══════════════════════════════════════════════════════════════════════════════
 def fig7_decay_signatures():
     print("Generating Fig 7: decay signature scatter …")
@@ -586,13 +586,13 @@ def fig7_decay_signatures():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 8 — Case study: temporal cascade profile
+# Fig 8: Case study: temporal cascade profile
 # ══════════════════════════════════════════════════════════════════════════════
 def fig8_temporal_cascade():
     print("Generating Fig 8: temporal cascade case study …")
     feat, labels = _load_data()
 
-    # County with partial waste in 2023 — chosen for visual interest
+    # County with partial waste in 2023: chosen for visual interest
     case_fips, case_comm = "05035", "CORN"
 
     feat_sub = feat[(feat["fips"] == case_fips) &
@@ -607,7 +607,7 @@ def fig8_temporal_cascade():
                    "Jul","Aug","Sep","Oct","Nov","Dec"]
 
     fig, axes = plt.subplots(2, 1, figsize=(7.0, 5.0), sharex=True)
-    fig.suptitle(f"FIPS {case_fips} ({case_comm.capitalize()}) — 2023 Cascade Profile",
+    fig.suptitle(f"FIPS {case_fips} ({case_comm.capitalize()}), 2023 Cascade Profile",
                  fontsize=10, fontweight="bold")
 
     ax_hop, ax_decay = axes
@@ -662,7 +662,7 @@ def fig8_temporal_cascade():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 9 — Cross-commodity interference box plots
+# Fig 9: Cross-commodity interference box plots
 # ══════════════════════════════════════════════════════════════════════════════
 def fig9_cross_commodity():
     print("Generating Fig 9: cross-commodity interference …")
@@ -747,7 +747,7 @@ def fig9_cross_commodity():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Fig 10 — Economic impact (temporal test set 2022–2025)
+# Fig 10: Economic impact (temporal test set 2022-2025)
 # ══════════════════════════════════════════════════════════════════════════════
 def fig10_economic_impact():
     print("Generating Fig 10: economic impact …")
@@ -831,7 +831,7 @@ FIGURES = [
 
 def main():
     print("=" * 60)
-    print("CasCrop — generating all publication figures")
+    print("CasCrop, generating all publication figures")
     print(f"Output directory: {OUT_DIR}")
     print("=" * 60)
 

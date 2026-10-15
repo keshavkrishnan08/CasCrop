@@ -64,7 +64,7 @@ def figure_3_ablation_results(
     p_values: Optional[dict] = None,
     output_path: str = "paper/figures/fig3_ablation.pdf",
 ):
-    """Figure 3: Main ablation results — grouped bar chart.
+    """Figure 3: Main ablation results, grouped bar chart.
 
     Shows AUC-ROC and AUC-PR for all ablation rows with error bars
     and significance stars.
@@ -232,7 +232,7 @@ def figure_7_economic_impact(
     lead_time_df: pd.DataFrame,
     output_path: str = "paper/figures/fig7_economic_impact.pdf",
 ):
-    """Figure 7: Economic impact — cumulative preventable waste vs lead time.
+    """Figure 7: Economic impact, cumulative preventable waste vs lead time.
 
     Shows CasCrop vs local-only model: how much more money is
     capturable with earlier warning.

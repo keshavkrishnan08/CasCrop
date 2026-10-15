@@ -53,10 +53,10 @@ def main():
     )
 
     # Figure 1: Architecture diagram (created manually or via tikz)
-    logger.info("Figure 1: Architecture diagram — create manually in TikZ/Illustrator")
+    logger.info("Figure 1: Architecture diagram, create manually in TikZ/Illustrator")
 
     # Figure 2: Example county graph (created from graph data)
-    logger.info("Figure 2: County graph — create from graph statistics")
+    logger.info("Figure 2: County graph, create from graph statistics")
 
     # Figure 3: Main ablation results
     logger.info("Generating Figure 3: Ablation results")
@@ -126,8 +126,8 @@ def main():
 
     # Supplementary figures
     logger.info("Generating supplementary figures")
-    # Figure S2: ROC curves — generated during evaluation
-    # Figure S3: Calibration plots — generated during evaluation
+    # Figure S2: ROC curves: generated during evaluation
+    # Figure S3: Calibration plots: generated during evaluation
     # Figure S4: Attention distributions
     # Figure S5: Geographic error distribution
 

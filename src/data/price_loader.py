@@ -249,7 +249,7 @@ class PriceLoader:
         df = pd.DataFrame(rows, columns=columns)
         df["date"] = pd.to_datetime(df.iloc[:, 0])
 
-        # Settlement / Last / Close price — different naming per commodity
+        # Settlement / Last / Close price: different naming per commodity
         price_col = None
         for cand in ["Settle", "Last", "Close", "Settlement"]:
             if cand in df.columns:
@@ -290,7 +290,7 @@ class PriceLoader:
             DataFrame with columns: state_code, commodity, year, month, price_received.
         """
         if not self.nass_api_key:
-            logger.warning("NASS API key not provided — skipping prices received")
+            logger.warning("NASS API key not provided, skipping prices received")
             return pd.DataFrame()
 
         if output_dir:
@@ -468,7 +468,7 @@ class PriceLoader:
         """Parse ERS cost-and-returns CSV into standardized format."""
         result = pd.DataFrame()
 
-        # ERS CSVs have variable layouts — find year and cost columns
+        # ERS CSVs have variable layouts: find year and cost columns
         year_col = None
         for cand in ["Year", "year", "YEAR"]:
             if cand in df.columns:

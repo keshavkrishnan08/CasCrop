@@ -1,4 +1,4 @@
-# Row 4: Symmetric ECMP — ECMP with single transformation for all shocks
+# Row 4: Symmetric ECMP: ECMP with single transformation for all shocks
 # Tests whether asymmetric pos/neg shock treatment matters
 _base_: default.yaml
 

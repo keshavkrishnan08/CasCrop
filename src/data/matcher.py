@@ -1,5 +1,5 @@
 """
-matcher.py — Match all data sources by county-crop-month.
+matcher.py, Match all data sources by county-crop-month.
 
 Merges biophysical (satellite, weather, soil), economic (prices, costs),
 historical (past losses, yields), and RMA insurance claim data into a
@@ -634,7 +634,7 @@ class DataMatcher:
                 loaded[name] = pd.read_parquet(path)
                 logger.info("Loaded %s: %d rows from %s", name, len(loaded[name]), path)
             else:
-                logger.warning("Source '%s' not found at %s — skipping.", name, path)
+                logger.warning("Source '%s' not found at %s, skipping.", name, path)
 
         if "rma" not in loaded:
             raise FileNotFoundError(

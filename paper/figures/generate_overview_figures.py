@@ -3,8 +3,8 @@
 Generate two publication-quality overview figures for the CasCrop paper.
 
 Produces:
-    fig0_graphical_abstract.pdf  — Single-page visual summary of the paper
-    fig1_architecture_v2.pdf     — Clean architecture diagram (replaces clipped version)
+    fig0_graphical_abstract.pdf, Single-page visual summary of the paper
+    fig1_architecture_v2.pdf, Clean architecture diagram (replaces clipped version)
 
 Run:
     python generate_overview_figures.py
@@ -135,7 +135,7 @@ def make_graphical_abstract():
         ))
 
     # =========================================================================
-    # LEFT PANEL — "The Problem"
+    # LEFT PANEL: "The Problem"
     # =========================================================================
     ax_l.text(0.5, 0.96, "The Problem", ha="center", va="top",
               fontsize=11, fontweight="bold", color=RED)
@@ -184,12 +184,12 @@ def make_graphical_abstract():
     ax_l.text(0.5, 0.48, "$19B in annual crop waste", ha="center", va="top",
               fontsize=9, fontweight="bold", color="#1a1a2e")
     ax_l.text(0.5, 0.40,
-              "Counties aren't independent —\nshocks cascade across networks",
+              "Counties aren't independent, \nshocks cascade across networks",
               ha="center", va="top", fontsize=8, color=GRAY,
               multialignment="center")
 
     # =========================================================================
-    # CENTER PANEL — "Our Insight"
+    # CENTER PANEL: "Our Insight"
     # =========================================================================
     ax_c.text(0.5, 0.96, "Our Insight", ha="center", va="top",
               fontsize=11, fontweight="bold", color=BLUE)
@@ -256,7 +256,7 @@ def make_graphical_abstract():
               fontweight="bold", color="#1a1a2e")
 
     # =========================================================================
-    # RIGHT PANEL — "Results"
+    # RIGHT PANEL: "Results"
     # =========================================================================
     ax_r.text(0.5, 0.96, "Results", ha="center", va="top",
               fontsize=11, fontweight="bold", color=GREEN)
@@ -347,7 +347,7 @@ def make_architecture():
     # BOX 4: Output (red/green gradient-ish)
     B4_X, B4_W = 13.15, 0.65
 
-    # ── BOX 1 — Local Features ────────────────────────────────────────────────
+    # ── BOX 1: Local Features ────────────────────────────────────────────────
     b1_face = "#D5F5E3"
     b1_edge = GREEN
     solid_box(ax, B1_X, BOX_Y, B1_W, BOX_H,
@@ -389,7 +389,7 @@ def make_architecture():
           B2_X - 0.05, ARROW_Y,
           color=GRAY, lw=2.0, mutation_scale=14)
 
-    # ── BOX 2 — Polarity-Routed Cascade Diffusion ─────────────────────────────
+    # ── BOX 2: Polarity-Routed Cascade Diffusion ─────────────────────────────
     b2_face = "#FEF9E7"
     b2_edge = ORANGE
     solid_box(ax, B2_X, BOX_Y, B2_W, BOX_H,
@@ -462,7 +462,7 @@ def make_architecture():
           B3_X - 0.05, ARROW_Y,
           color=GRAY, lw=2.0, mutation_scale=14)
 
-    # ── BOX 3 — MLP Classifier ────────────────────────────────────────────────
+    # ── BOX 3: MLP Classifier ────────────────────────────────────────────────
     b3_face = "#EBD5F8"
     b3_edge = PURPLE
     solid_box(ax, B3_X, BOX_Y, B3_W, BOX_H,
@@ -511,7 +511,7 @@ def make_architecture():
           B4_X - 0.02, ARROW_Y,
           color=GRAY, lw=2.0, mutation_scale=14)
 
-    # ── BOX 4 — Output ────────────────────────────────────────────────────────
+    # ── BOX 4: Output ────────────────────────────────────────────────────────
     # Two stacked half-boxes
     half_h = BOX_H / 2
     # Waste (red top)

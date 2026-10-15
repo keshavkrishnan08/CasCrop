@@ -123,7 +123,7 @@ def load_rma() -> pd.DataFrame:
     rma["month_num"] = pd.to_numeric(rma["month_num"].str.strip(), errors="coerce")
     rma["cause_code"] = pd.to_numeric(rma["cause_code"].str.strip(), errors="coerce")
 
-    # Parse indemnity — handle dollar signs and commas
+    # Parse indemnity: handle dollar signs and commas
     rma["indemnity"] = (
         rma["indemnity"].astype(str)
         .str.replace("$", "", regex=False)
@@ -166,7 +166,7 @@ def build_monthly_labels(
         ),
     ).reset_index()
 
-    # Binary waste label — lower threshold for monthly data
+    # Binary waste label: lower threshold for monthly data
     agg["waste"] = (agg["total_indemnity"] >= threshold).astype(int)
 
     # Cause category
@@ -185,7 +185,7 @@ def build_monthly_labels(
 # ── Step 2: Load NASS crop features (annual, replicated per month) ─────
 
 def load_nass() -> pd.DataFrame:
-    """Load NASS county crop data. Annual only — will be replicated per month later."""
+    """Load NASS county crop data. Annual only, will be replicated per month later."""
     path = RAW / "nass" / "all_crops_county_annual.csv"
     if not path.exists():
         logger.warning("NASS county data not found, skipping")
@@ -316,7 +316,7 @@ def load_weather_monthly() -> pd.DataFrame:
 def load_prices_monthly() -> pd.DataFrame:
     """Load commodity price data at monthly resolution.
 
-    Computes month-over-month price change — the key monthly shock signal
+    Computes month-over-month price change, the key monthly shock signal
     that annual data can't capture.
     """
     price_dir = RAW / "prices"
@@ -347,7 +347,7 @@ def load_prices_monthly() -> pd.DataFrame:
         # Sort chronologically
         df = df.sort_values(["commodity", "year", "month"]).reset_index(drop=True)
 
-        # Month-over-month price change — the core monthly signal
+        # Month-over-month price change: the core monthly signal
         df["price_change_1m"] = df.groupby("commodity")["price"].pct_change()
 
         # Rolling 3-month price stats for richer context
@@ -491,7 +491,7 @@ def merge_all_monthly(
     merged = merged.merge(hist_annual, on=["fips", "commodity"], how="left")
 
     # ── County-specific economic shock (monthly version) ──
-    # price_change_1m varies every month — this is the key improvement over annual
+    # price_change_1m varies every month: this is the key improvement over annual
     if "production" in merged.columns and "price_change_1m" in merged.columns:
         # County production share (from annual NASS data)
         total_prod = merged.groupby(
@@ -550,7 +550,7 @@ def merge_all_monthly(
         .shift(1)
     )
 
-    # The first month per county-commodity will be NaN after shift — drop it
+    # The first month per county-commodity will be NaN after shift, drop it
     before_lag_drop = len(merged)
     merged = merged.dropna(
         subset=feature_cols_to_lag, how="all"

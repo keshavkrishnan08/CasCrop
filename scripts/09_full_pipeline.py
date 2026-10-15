@@ -69,7 +69,7 @@ def main():
     args = parser.parse_args()
 
     start_time = datetime.now()
-    logger.info(f"CasCrop Full Pipeline — Started at {start_time}")
+    logger.info(f"CasCrop Full Pipeline, Started at {start_time}")
     logger.info(f"Config: {args.config}")
 
     results = {}

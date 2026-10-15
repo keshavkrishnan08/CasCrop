@@ -1,4 +1,4 @@
-"""Economic Contagion Message Passing (ECMP) — the core novel graph layer.
+"""Economic Contagion Message Passing (ECMP), the core novel graph layer.
 
 Standard GAT computes attention as:
     alpha_ij = softmax_j( LeakyReLU( a^T [Wh_i || Wh_j] ) )
@@ -71,7 +71,7 @@ class ECMPLayer(nn.Module):
         self.att = nn.Parameter(torch.empty(num_heads, att_input_dim))
         nn.init.xavier_uniform_(self.att.unsqueeze(0))  # treat as (1, H, att_dim)
 
-        # Asymmetric shock embedding — larger dim (32) for stronger signal
+        # Asymmetric shock embedding: larger dim (32) for stronger signal
         if asymmetric:
             self.W_pos = nn.Linear(1, shock_embed_dim, bias=False)
             self.W_neg = nn.Linear(1, shock_embed_dim, bias=False)
@@ -120,7 +120,7 @@ class ECMPLayer(nn.Module):
         """
         if self.asymmetric:
             pos = F.relu(price_shocks)                    # (N, 1)
-            neg = -F.relu(-price_shocks)                  # (N, 1) — keeps sign
+            neg = -F.relu(-price_shocks)                  # (N, 1): keeps sign
             phi = self.W_pos(pos) + self.W_neg(neg)       # (N, shock_embed_dim)
         else:
             phi = self.W_sym(price_shocks)                # (N, shock_embed_dim)
@@ -159,8 +159,8 @@ class ECMPLayer(nn.Module):
         phi_j = phi[src]  # (E, shock_embed_dim)
 
         # 3. Build attention inputs per edge ---------------------------------------
-        Wh_i = Wh[dst]  # (E, H, D) — destination (aggregating node)
-        Wh_j = Wh[src]  # (E, H, D) — source (message sender)
+        Wh_i = Wh[dst]  # (E, H, D): destination (aggregating node)
+        Wh_j = Wh[src]  # (E, H, D): source (message sender)
 
         # Expand phi_j to all heads: (E, shock_embed_dim) -> (E, H, shock_embed_dim)
         phi_j_exp = phi_j.unsqueeze(1).expand(-1, H, -1)

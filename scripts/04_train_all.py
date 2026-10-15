@@ -102,8 +102,8 @@ def build_tensors(features, labels, stats, groups, fips_to_idx):
     y_waste = torch.from_numpy(labels["waste"].values.astype(np.float32)).unsqueeze(1)
     y_cause = torch.from_numpy(labels["cause_idx"].values.astype(np.int64))
 
-    # Price shocks — use county-specific shock if available (varies per county)
-    # Falls back to national price_change_pct (identical across counties — bad for ECMP)
+    # Price shocks: use county-specific shock if available (varies per county)
+    # Falls back to national price_change_pct (identical across counties, bad for ECMP)
     shock_col = "county_shock" if "county_shock" in features.columns else "price_change_pct"
     if shock_col in features.columns:
         shock_vals = features[shock_col].fillna(0).values.astype(np.float32)

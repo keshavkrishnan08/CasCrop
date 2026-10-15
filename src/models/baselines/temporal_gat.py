@@ -17,7 +17,7 @@ from ..heads.cause_classifier import CauseClassifier
 
 
 class TemporalGATModel(nn.Module):
-    """GRU + standard GAT — temporal with graph but no shock conditioning."""
+    """GRU + standard GAT, temporal with graph but no shock conditioning."""
 
     def __init__(
         self,

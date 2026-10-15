@@ -108,7 +108,7 @@ def load_rma() -> pd.DataFrame:
     rma["month_num"] = pd.to_numeric(rma["month_num"].str.strip(), errors="coerce")
     rma["cause_code"] = pd.to_numeric(rma["cause_code"].str.strip(), errors="coerce")
 
-    # Parse indemnity — handle both dollar signs and commas
+    # Parse indemnity: handle both dollar signs and commas
     for col in ["indemnity"]:
         rma[col] = (
             rma[col].astype(str)

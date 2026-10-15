@@ -15,7 +15,7 @@ Every architectural component is novel:
 
 3. Vulnerability-Conditioned Channel Routing:
    Biophysical state produces PER-CHANNEL activation weights over
-   the 10 cascade features. Not a single scalar gate — each
+   the 10 cascade features. Not a single scalar gate, each
    contagion pathway (neg-commodity-hop1, pos-geo-hop3, decay, etc.)
    gets an independent learned weight conditioned on local stress.
    Interpretable: reveals which pathways activate under drought vs flood.
@@ -57,7 +57,7 @@ class CascadePersistenceHead(nn.Module):
     """Novel: derives systemic risk score from cascade decay signatures.
 
     Input: 4 decay features (neg_2, neg_3, pos_2, pos_3)
-    Output: scalar in [0, 1] — 1 = highly systemic, 0 = local noise.
+    Output: scalar in [0, 1], 1 = highly systemic, 0 = local noise.
 
     Flat decay (ratios near 1) → persistent, systemic contagion.
     Steep decay (ratios near 0) → localized, idiosyncratic shock.
@@ -143,7 +143,7 @@ class PRCN(nn.Module):
         self.persistence_head = CascadePersistenceHead()
 
         # Prediction heads
-        # z_bio + z_cascade + hist + persistence_score (skip raw econ — cascade has diffused econ)
+        # z_bio + z_cascade + hist + persistence_score (skip raw econ, cascade has diffused econ)
         head_input = latent_dim * 2 + hist_dim + 1
         self.waste_head = nn.Sequential(
             nn.Linear(head_input, 64),
@@ -173,7 +173,7 @@ class PRCN(nn.Module):
         x_hist = batch["x_hist"]
         x_cascade = batch["x_cascade"]  # (B, 10): 6 diffusion + 4 decay
 
-        # Encode bio (skip raw econ — cascade features include diffused econ)
+        # Encode bio (skip raw econ: cascade features include diffused econ)
         z_bio = self.bio_enc(x_bio)
         z_econ = self.econ_enc(x_econ)
         dis_loss = self._disentangle_loss(z_bio, z_econ)
@@ -211,7 +211,7 @@ class PRCN(nn.Module):
 class TemporalPRCN(nn.Module):
     """Temporal PRCN: GRU over monthly cascade sequences.
 
-    Novel: contagion MOMENTUM — sustained multi-hop exposure over T months
+    Novel: contagion MOMENTUM, sustained multi-hop exposure over T months
     compounds risk nonlinearly. A county receiving 3+ months of negative
     cascade signals develops amplified risk that a single-snapshot model misses.
 
@@ -263,7 +263,7 @@ class TemporalPRCN(nn.Module):
     def forward(self, batch: Dict[str, Any]) -> Dict[str, torch.Tensor]:
         x_bio = batch["x_bio"]        # (B, T, bio_dim)
         x_econ = batch["x_econ"]      # (B, T, econ_dim)
-        x_hist = batch["x_hist"]      # (B, hist_dim) — static
+        x_hist = batch["x_hist"]      # (B, hist_dim): static
         x_cascade = batch["x_cascade"]  # (B, T, cascade_dim)
 
         B, T, _ = x_bio.shape

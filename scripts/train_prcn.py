@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Train PRCN (Polarity-Routed Cascade Network) ablation suite.
 
-5-row ablation — each row adds ONE novel component:
-    R1: local_only        — bio + hist, no graph
-    R2: local_econ        — bio + econ + hist, no graph
-    R3: symmetric_diff    — symmetric diffusion (same graph, collapse +/-)
-    R4: polarity_routed   — neg→commodity graph, pos→geo graph (novel routing)
-    R5: prcn              — + decay signatures + vulnerability routing (full model)
+5-row ablation, each row adds ONE novel component:
+    R1: local_only, bio + hist, no graph
+    R2: local_econ, bio + econ + hist, no graph
+    R3: symmetric_diff, symmetric diffusion (same graph, collapse +/-)
+    R4: polarity_routed, neg→commodity graph, pos→geo graph (novel routing)
+    R5: prcn, + decay signatures + vulnerability routing (full model)
 
 Usage:
     python scripts/precompute_cascade.py                    # run once
@@ -121,7 +121,7 @@ class _LocalEcon(nn.Module):
 
 
 class _CascadeDirect(nn.Module):
-    """R3: bio + hist + cascade features (skip raw econ — graph-diffused is cleaner)."""
+    """R3: bio + hist + cascade features (skip raw econ, graph-diffused is cleaner)."""
     def __init__(self, bio_dim, hist_dim, cascade_dim, **kw):
         super().__init__()
         self.net = nn.Sequential(
@@ -136,7 +136,7 @@ class _CascadeDirect(nn.Module):
 
 
 class _SymmetricDiff(nn.Module):
-    """R3: symmetric diffusion — collapse pos+neg per hop, single graph."""
+    """R3: symmetric diffusion, collapse pos+neg per hop, single graph."""
     def __init__(self, bio_dim, econ_dim, hist_dim, cascade_dim, **kw):
         super().__init__()
         n_hops = 3  # 3 hop distances, 2 channels each (pos+neg) = first 6 features
@@ -194,14 +194,14 @@ class SequenceDataset(Dataset):
     def __init__(self, x_bio, x_econ, x_hist, x_cascade, y_waste, y_cause, seq_map, indices):
         self.x_bio = x_bio; self.x_econ = x_econ; self.x_hist = x_hist
         self.x_cascade = x_cascade; self.y_waste = y_waste; self.y_cause = y_cause
-        self.seq_map = seq_map  # (N_total, W) — global indices, -1 for padding
+        self.seq_map = seq_map  # (N_total, W): global indices, -1 for padding
         self.indices = indices  # global indices for this split
 
     def __len__(self): return len(self.indices)
 
     def __getitem__(self, idx):
         gi = self.indices[idx]  # global index
-        seq = self.seq_map[gi]  # (W,) — global indices
+        seq = self.seq_map[gi]  # (W,): global indices
         W = len(seq)
         bio_seq = torch.zeros(W, self.x_bio.size(1))
         econ_seq = torch.zeros(W, self.x_econ.size(1))
